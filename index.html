@@ -388,8 +388,9 @@
   .pg.ab2 .sec h4 { font-size: max(11px, 1.3cqw); }
   .pg.ab2 .sec p { font-size: max(9.5px, 1.02cqw); color: var(--fx-dim); margin-bottom: .35cqw; }
   .pg.ab2 .copy { font: 300 max(8.5px, .95cqw)/1 var(--f-data); letter-spacing: .2em; color: var(--fx-dim); padding-top: max(10px, 2cqh); border-top: 1px solid var(--fx-rule); }
-  /* ---- 第 22 版：戻るとき、終点画像を絵にして地図の上に重ねる（淡く消える） ---- */
-  #map > canvas.backsnap { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 640; pointer-events: none; transform-origin: 50% 50%; }
+  /* ---- 第 23 版：戻るとき、終点画像と引き出し線を一枚にして地図の上に重ねる（縮めずに淡く消える） ---- */
+  #map > .backsnap { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 640; pointer-events: none; overflow: hidden; }
+  #map > .backsnap > canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 </style>
 </head>
 <body>
@@ -492,7 +493,7 @@
   const meta = await fetch('meta.json', { cache: 'no-cache' }).then((r) => r.json());
   // 版の食い違い防止：このページの版番号と、サイトのデータ（meta.json）の版番号が違えば読み込み直す。
   // 古いページを開いたまま新しい画像を取りに行くと、地名と画像がずれ、境界の決まりも古いままになる
-  const BUILD = 22;
+  const BUILD = 23;
   const fresh = (b) => {          // 同じ版番号では 1 回だけ（アドレスに ?b= が付いていれば、もう試した）
     const q = '?b=' + encodeURIComponent(b);
     if (location.search === q) return false;
@@ -589,23 +590,29 @@
   const limCenter = (l) => { const q = limRect(l); return map.unproject([(q[0] + q[2]) / 2, (q[1] + q[3]) / 2], l.maxZoom); };
   const coverZoom = (l) => { const q = limRect(l), sz = map.getSize(); return l.maxZoom + Math.log2(Math.max(sz.x / (q[2] - q[0]), sz.y / (q[3] - q[1]))); };
   let hardLayer = null, guarding = false;
+  // 拡大・縮小の操作（つまむ・ダブルタップ・ホイール・範囲ズーム）を止める／戻す。第 23 版：終点の一枚画像を見ている間は止める（引いて動かすのはできる）
+  const zoomGestures = (off) => { for (const h of [map.touchZoom, map.scrollWheelZoom, map.doubleClickZoom, map.boxZoom]) { try { if (off) h.disable(); else h.enable(); } catch (e) {} } };
   function limit(l) {          // 最小ズーム＝lim が画面を覆う倍率。中心も lim の内側へ（アニメなし）
     // 先に最小ズームを決める（あとで位置を決めると、ズームの刻みで「覆う」より小さく丸められることがある）
     hardLayer = null; map.setMaxBounds(null);
+    if (l.img) map.setMaxZoom(Z + 2);          // 終点の一枚画像：いったん上限を外し、「覆う」倍率ちょうどに置いてから上限もそこに固定する
     const zc = coverZoom(l), b = limOf(l); map.setMinZoom(zc);
-    const z = Math.max(map.getZoom(), zc);
+    const z = l.img ? zc : Math.max(map.getZoom(), zc);
     const snap = map.options.zoomSnap; map.options.zoomSnap = 0;      // 刻みで丸めない（丸めると「全体表示」が少し拡大されてしまう）
     map.setView(map._limitCenter(map.getCenter(), z, b), z, { animate: false }); map.options.zoomSnap = snap;
     map.setMaxBounds(b); hardLayer = l;
+    // 終点の一枚画像は画面をちょうど覆う大きさで、上下（または左右）に余りがない。指を離したあとの慣性の滑りは端で 1 ピクセルほど丸めてずれ、地色の細い帯が出るので止める（backDone で戻す）
+    if (l.img) { map.setMaxZoom(zc); zoomGestures(true); map.options.inertia = false; }
   }
   window.__wv7map = { map: map, layers: L0, cur: () => hardLayer, limRect: limRect, boundsOf: boundsOf, coverZoom: coverZoom, toPx: toPx };   // 動作確認用
   // 硬い限界：どれだけ引いても（マウスを画面の外まで引いても）、視野は画像の本当の端を越えない
   const drg = map.dragging._draggable; let hardOff = null;
   drg.on('dragstart', () => {
     if (!hardLayer) { hardOff = null; return; }
-    const b = boundsOf(hardLayer), sz = map.getSize();
+    const b = hardLayer.img ? limOf(hardLayer) : boundsOf(hardLayer), sz = map.getSize();          // 第 23 版：終点の一枚画像は画像の端まで（外に緩衝の画がない）
     hardOff = L.bounds(map.latLngToContainerPoint(b.getNorthWest()).multiplyBy(-1), map.latLngToContainerPoint(b.getSouthEast()).multiplyBy(-1).add(sz));
-    hardOff.min = hardOff.min.add([2, 2]); hardOff.max = hardOff.max.subtract([2, 2]);   // 端数の丸めで 1 ピクセル覗かないよう、2 ピクセル内側で止める
+    const ix = Math.max(0, Math.min(2, (hardOff.max.x - hardOff.min.x) / 2)), iy = Math.max(0, Math.min(2, (hardOff.max.y - hardOff.min.y) / 2));
+    hardOff.min = hardOff.min.add([ix, iy]); hardOff.max = hardOff.max.subtract([ix, iy]);   // 端数の丸めで 1 ピクセル覗かないよう、2 ピクセル内側で止める
   });
   drg.on('predrag', () => {
     if (!hardOff || !hardLayer) return;
@@ -623,7 +630,17 @@
   const dropOthers = (keep) => { for (const id2 of Object.keys(tileLayers)) { const t = tileLayers[id2]; if (t !== keep && map.hasLayer(t)) map.removeLayer(t); } };
   // 読み込み済みのタイルを捨てずに視野を切り替える（setView は倍率が変わると全部捨てて読み直す）
   const jump = (c, z) => { map._stop(); map._moveStart(true, false)._move(c, z)._moveEnd(true); };
+  // 第 23 版：降下の終点は一枚の画像（映像と同じ 1920×1080、拡大・移動はしない）。地図の座標で映像の画面（lim）にぴったり貼るので、地名の引き出し線の位置はそのまま
+  const StillLayer = L.ImageOverlay.extend({
+    initialize: function (l) { L.ImageOverlay.prototype.initialize.call(this, '', limOf(l), { interactive: false, className: 'still' }); this._l = l; },
+    onAdd: function (m) {
+      L.ImageOverlay.prototype.onAdd.call(this, m);
+      loadImg(this._l.img, TILE_MIME).then((u) => { if (this._url !== u) this.setUrl(u); }).catch(() => {});
+    },
+    isLoading: function () { const im = this._image; return !(this._url && im && im.complete && im.naturalWidth); },
+  });
   function tl(id) {
+    if (!tileLayers[id] && L0[id] && L0[id].img) tileLayers[id] = new StillLayer(L0[id]);
     if (!tileLayers[id]) { const l = L0[id];
       const t = tileLayers[id] = new EncLayer({ lid: id, tileSize: meta.tile >> RET, off: RET, minZoom: -4, maxZoom: Z + 2, maxNativeZoom: NZ(l) - RET,
         minNativeZoom: -RET, bounds: boundsOf(l), noWrap: true, keepBuffer: 3, updateWhenZooming: false, edge: 1, fade: 380 });
@@ -757,7 +774,7 @@
   const minZoom0 = map.getMinZoom();
   msgEl.classList.remove('show');
 
-  // ---- フライイン：地名をタップ → 上空から降下する映像 → 終点の高精細画像（拡大・移動可） ----
+  // ---- フライイン：地名をタップ → 上空から降下する映像 → 終点の画像（第 23 版から映像と同じ大きさの一枚画像、拡大・移動しない） ----
   const flyv = document.getElementById('flyv'), backBtn = document.getElementById('back'), flyName = document.getElementById('flyname');
   const root = document.documentElement, flyBlobs = {};
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -984,6 +1001,7 @@
       const waitT = setTimeout(() => root.classList.add('waiting'), 500);
       const vurl = await Promise.race([urlP.catch(() => null), sleep(12000).then(() => null)]);
       clearTimeout(waitT); root.classList.remove('waiting');
+      if (L0[V.layer] && L0[V.layer].img) loadImg(L0[V.layer].img, TILE_MIME).catch(() => {});          // 終点の一枚画像（映像の再生中に届く）
       let playing = false; const ended = new Promise((r) => { flyv.onended = r; });
       if (vurl) {
         await primeVideo(flyv, vurl, 900);
@@ -1011,9 +1029,10 @@
       document.documentElement.classList.toggle('relief', lay.style === 'relief');          // 降下の終点図は実景
       flyName.textContent = F.label;
       if (playing) { await Promise.race([ended, sleep((F.duration + 4) * 1000)]); await sleep(250); }
-      else await Promise.race([next.isLoading() ? new Promise((r) => next.once('load', r)) : Promise.resolve(), sleep(2500)]);          // 映像なし：終点のタイルだけ待つ
+      // 終点画像が届くまで待つ（映像は最終コマで止まったまま。映像なしのときも同じ）
+      await Promise.race([next.isLoading() ? new Promise((r) => next.once('load', r)) : Promise.resolve(), sleep(playing ? 3000 : 2500)]);
       flyv.classList.remove('show');
-      root.classList.add('flyend');
+      root.classList.add('flyend'); prewarmBack(key);
       await sleep(450);
       flyv.removeAttribute('src'); flyv.load();
       const fl = document.fonts ? [document.fonts.load('200 20px Jost'), document.fonts.load('300 12px "IBM Plex Mono"'), document.fonts.load('300 12px "Noto Sans JP Sub"', 'エ')] : [];
@@ -1030,7 +1049,7 @@
   }
   // 戻る処理の締め：降下前の位置・境界の制限・地名・操作ボタンを元に戻す（途中で失敗しても、ここへ来れば元どおり）
   function backDone() {
-    hideInfo(); flyv.classList.remove('show');
+    hideInfo(); flyv.classList.remove('show'); zoomGestures(false); map.options.inertia = true;
     st.fly = null; root.classList.remove('flying', 'flyend', 'leaving', 'fly-eden', 'fly-coast');
     hardLayer = null; map.setMaxBounds(null); map.setMinZoom(-4); map.setMaxZoom(ZCAP);
     curView = st.view;
@@ -1040,25 +1059,52 @@
     map.options.zoomSnap = 0.25;
     apply(false);
   }
-  // 戻る（第 22 版から映像なし）：終点画像を一枚の絵にして重ね、その下で地図を「終点と同じくらいの倍率」（拡大の上限を越えてよい）まで寄せておき、
-  // 絵を淡く消しながら全図まで引く。飛び込んだ地点は画面の中にとどまり、全図での本来の位置へ少しずつ動いて、引き終わると同時にそこへ着く
+  // 戻る（第 23 版）：押したコマで全部いっしょに動き出す。紹介文・ボタンが淡く消えはじめるのと同時に、終点画像（と地名の引き出し線）を一枚にして重ね、
+  // その下で地図を降下前の層・「引きの起点」（終点と同じくらいの倍率、拡大の上限を越えてよい）に差し替えて、すぐに全図まで引きはじめる。
+  // 重ねた絵は縮めずに 0.4 秒で淡く消える。地図のタイルは終点を見ている間に読んである（prewarmBack）ので、待たない。
+  // 飛び込んだ地点は画面の中にとどまり、全図での本来の位置へ少しずつ動いて、引き終わると同時にそこへ着く
   const easeIO = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const easeO = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : 1 - Math.pow(1 - t, 3));
-  function snapLayer(layer, bg) {          // いま見えているタイル（下敷き → 本体の順）を一枚の絵にする。地図の座標で描くので、画面を 90° 回していてもずれない
-    const sz = map.getSize(), k = Math.min(2, window.devicePixelRatio || 1), cv = document.createElement('canvas');
-    cv.width = Math.round(sz.x * k); cv.height = Math.round(sz.y * k); cv.className = 'backsnap';
+  function snapStill(ly, bg) {          // 終点画像（canvas に描く）と引き出し線（要素を写す）を、地図の外の一枚にする。画面を 90° 回していてもずれない
+    const sz = map.getSize(), k = Math.min(2, window.devicePixelRatio || 1);
+    const box = document.createElement('div'); box.className = 'backsnap';
+    const cv = document.createElement('canvas'); cv.width = Math.round(sz.x * k); cv.height = Math.round(sz.y * k);
     const g = cv.getContext('2d'); g.fillStyle = bg || '#000'; g.fillRect(0, 0, cv.width, cv.height);
-    const draw = (ly) => {
-      if (!ly || !ly._tiles || !map.hasLayer(ly)) return;
-      const tz = ly._tileZoom, ts = Object.values(ly._tiles).sort((p, q) => Math.abs(q.coords.z - tz) - Math.abs(p.coords.z - tz));
-      for (const t of ts) {
-        const im = t.el; if (!im || !im.complete || !im.naturalWidth) continue;
-        const bb = ly._tileCoordsToBounds(t.coords), p0 = map.latLngToContainerPoint(bb.getNorthWest()), p1 = map.latLngToContainerPoint(bb.getSouthEast());
-        try { g.drawImage(im, p0.x * k, p0.y * k, (p1.x - p0.x) * k, (p1.y - p0.y) * k); } catch (e) {}
-      }
+    const im = ly && ly._image;
+    if (im && im.complete && im.naturalWidth && ly._map) {
+      const bb = ly.getBounds(), p0 = map.latLngToContainerPoint(bb.getNorthWest()), p1 = map.latLngToContainerPoint(bb.getSouthEast());
+      try { g.drawImage(im, p0.x * k, p0.y * k, (p1.x - p0.x) * k, (p1.y - p0.y) * k); } catch (e) {}
+    }
+    box.appendChild(cv);
+    if (notesLayer) notesLayer.eachLayer((m) => {
+      const el = m.getElement(); if (!el) return;
+      const c = el.cloneNode(true), p = map.latLngToContainerPoint(m.getLatLng()).round();
+      c.classList.remove('leaflet-zoom-animated'); c.style.transform = 'translate3d(' + p.x + 'px,' + p.y + 'px,0)';
+      box.appendChild(c);
+    });
+    return box;
+  }
+  // 層 l を視野（中心 c、倍率 z）で出したときに要るタイル（本体＋下敷き、外側 1 枚まで）の場所。GridLayer と同じ数え方
+  function backTiles(l, c, z) {
+    const out = [], sz = map.getSize(), ts = meta.tile >> RET;
+    const grid = (gz) => {
+      const s2 = Math.pow(2, gz - z), cp = map.project(c, gz), hx = sz.x * s2 / 2 + ts, hy = sz.y * s2 / 2 + ts;
+      const f = Math.pow(2, gz + RET - l.maxZoom), nx = Math.ceil(l.w * f / meta.tile), ny = Math.ceil(l.h * f / meta.tile);
+      for (let y = Math.max(0, Math.floor((cp.y - hy) / ts)); y <= Math.min(ny - 1, Math.floor((cp.y + hy) / ts)); y++)
+        for (let x = Math.max(0, Math.floor((cp.x - hx) / ts)); x <= Math.min(nx - 1, Math.floor((cp.x + hx) / ts)); x++) out.push(`t/${l.id}/${gz + RET}/${x}_${y}.bin`);
     };
-    draw(layer._under); draw(layer);
-    return cv;
+    grid(Math.max(-RET, Math.min(NZ(l) - RET, Math.round(z))));
+    grid(Math.min(3, NZ(l)) - RET);
+    return out;
+  }
+  const pullStart = (PL) => ({ P0: map.unproject(toPx('top', PL.X, PL.Y, 0), Zt), z0: Math.min(Z + 2, Zt + Math.log2(coverW() / (PL.W * TW / (T.X1 - T.X0)))) });
+  function prewarmBack(key) {          // 終点に着いたら、戻るときに出す地図（全図と引きの起点）のタイルを先に読んで覚えておく
+    try {
+      const PL = meta.flyins[key] && meta.flyins[key].pull, base = L0[lid()];
+      if (!PL || !base || base.img) return;
+      const q = pullStart(PL), us = new Set([...backTiles(base, limCenter(base), coverZoom(base)), ...backTiles(base, q.P0, q.z0)]);
+      for (const u of us) getTile(u).catch(() => {});
+    } catch (e) {}
   }
   async function flyBack() {
     if (flying || !st.fly) return;
@@ -1066,17 +1112,13 @@
     let held = null, fadeWas = null, snap = null;
     flying = true;
     try {
-      // 1) 表示を消す。終点画像を拡大・移動していたら、映像の最終コマと同じ範囲へ戻す
-      fxStop(); root.classList.add('leaving'); root.classList.remove('flyend');
-      const zc = coverZoom(lay), cc = limCenter(lay);
-      const off = () => Math.abs(map.getZoom() - zc) > 1e-3 || map.latLngToContainerPoint(cc).distanceTo(map.getSize().divideBy(2)) > 1;
-      map._stop(); if (off()) map.flyTo(cc, zc, { duration: 0.45 });
-      await sleep(480);
-      hideInfo(); if (off()) jump(cc, zc);
-      if (!PL) { backDone(); return; }
-      // 2) 終点画像を一枚の絵にして地図の上に重ねる（この下で地図を差し替える）
-      snap = snapLayer(tl(F.layer), lay.bg); map.getContainer().appendChild(snap);
-      // 3) 降下前の層に差し替え、行き先（全図）と出発点（終点と同じくらいの倍率）のタイルを読んでおく。この層はタイルを捨てない
+      fxStop();
+      // 1) 終点画像と引き出し線を一枚にして重ねる。クラスを付ける前に写すので、写しの線も紹介文と同じ速さで淡く消える
+      snap = snapStill(tl(F.layer), lay.bg); map.getContainer().appendChild(snap); void snap.offsetWidth;
+      if (notesLayer) { map.removeLayer(notesLayer); notesLayer = null; }
+      root.classList.add('leaving'); root.classList.remove('flyend');
+      if (!PL) { snap.style.transition = 'opacity .4s ease'; snap.style.opacity = '0'; await sleep(450); backDone(); return; }
+      // 2) 絵の下で降下前の層に差し替え、全図→引きの起点と跳んでタイルを出しておく（読んであるので待たない。この層はタイルを捨てない）
       st.fly = null;
       hardLayer = null; map.setMaxBounds(null); map.setMinZoom(-4); map.setMaxZoom(Z + 2);
       const base = L0[lid()], next = tl(base.id);
@@ -1085,29 +1127,25 @@
       if (map.hasLayer(next)) next.bringToFront(); else next.addTo(map);
       shown = next; dropOthers(next);
       document.body.style.background = base.bg; map.getContainer().style.background = base.bg;
-      const loaded = (ms) => (next.isLoading() ? Promise.race([new Promise((r) => next.once('load', r)), sleep(ms)]) : Promise.resolve());
-      const zEnd = coverZoom(base), cEnd = limCenter(base);
-      const P0 = map.unproject(toPx('top', PL.X, PL.Y, 0), Zt);          // 飛び込んだ地点
-      const z0 = Math.min(Z + 2, Zt + Math.log2(coverW() / (PL.W * TW / (T.X1 - T.X0))));
-      jump(cEnd, zEnd); await loaded(500);          // 等太久终点画像会停住不动（粗的下敷タイルがあるので、来なくても空白にはならない）
-      jump(P0, z0); await loaded(450);
-      // 4) 引く。地点の画面上の位置：正中 → 全図での位置（中心からのずれ pEnd）。倍率は起点 → 全図
+      const zEnd = coverZoom(base), cEnd = limCenter(base), q = pullStart(PL), P0 = q.P0, z0 = q.z0;
+      jump(cEnd, zEnd); jump(P0, z0);
+      // 3) 引く。地点の画面上の位置：正中 → 全図での位置（中心からのずれ pEnd）。倍率は起点 → 全図。重ねた絵は 0.4 秒で淡く消える（縮めない）
       const pEnd = map.project(P0, zEnd).subtract(map.project(cEnd, zEnd));
       const dur = (PL.dur || 2) * 1000, ez = PL.ease === 'out' ? easeO : easeIO;
       map._stop(); map._moveStart(true, false);
       await new Promise((done) => {
-        const t0 = performance.now(); let last = t0, fin = false;
+        const t0 = performance.now(); let last = t0, fin = false, cleared = false;
         const step = () => {
           if (fin) return;
           const now = performance.now(); last = now;
           const el = now - t0, u = Math.min(1, el / dur), z = z0 + (zEnd - z0) * ez(u);
           const c = map.unproject(map.project(P0, z).subtract(pEnd.multiplyBy(easeIO(u))), z);
           map._move(c, z, { flyTo: true });
-          const f = easeIO(Math.min(1, el / 400));
-          snap.style.opacity = (1 - f).toFixed(3); snap.style.transform = 'scale(' + (1 - 0.08 * f).toFixed(4) + ')';
+          snap.style.opacity = (1 - easeIO(Math.min(1, el / 400))).toFixed(3);
+          if (!cleared && el >= 450) { cleared = true; hideInfo(); }          // 紹介文が消えきってから中身を片づける
           if (u < 1) requestAnimationFrame(step); else { fin = true; done(); }
         };
-        // コマごとの呼び出しが止まる環境（裏に回った、忙しい）では、タイマーで進める（文字の効果と同じやり方）
+        // コマごとの呼び出しが止まる環境（裏に回った、忙しい）では、タイマーで進める
         const dog = () => { if (fin) return; if (performance.now() - last > 120) step(); setTimeout(dog, 40); };
         requestAnimationFrame(step); dog();
       });
