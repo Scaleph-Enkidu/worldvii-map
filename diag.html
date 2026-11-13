@@ -42,7 +42,7 @@
   .dk img, .dk canvas, .dk .bgi { width: 46px; height: 46px; display: block; } .dk iframe { width: 104px; height: 52px; border: 0; display: block; }
   .dk .big img { width: 132px; height: 132px; }
   .dk figure { position: relative; } .dk figure .hit { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
-  .dk figure.bad { outline: 2px solid #ff5a4a; outline-offset: 2px; } .dk figure.bad::after { content: "变了"; position: absolute; right: 0; top: 0; background: #ff5a4a; color: #fff; font-size: 8px; padding: 0 2px; }
+  .dk figure.bad { outline: 2px solid #ff5a4a; outline-offset: 2px; } .dk figure.bad::after { content: "✕"; position: absolute; right: 0; top: 0; background: #ff5a4a; color: #fff; font-size: 8px; padding: 0 2px; }
   .pk, #more { padding: 8px 12px; border-radius: 9px; border: 1px solid rgba(236, 231, 220, .5); background: #1c2632; color: #fff; font-size: 13px; margin: 4px 6px 4px 0; }
   .pk.bad { background: #7a2a22; border-color: #ff5a4a; } #more { border-color: #35d0ff; background: #12324a; font-size: 15px; padding: 11px 14px; }
   #shot { font-size: 13px; color: #cfe; max-width: 100%; }
@@ -51,6 +51,8 @@
   #wrap { left: 0; right: 0; top: 0; bottom: 0; } #in { padding: 14px 18px 200px; max-width: 520px; margin: 0 auto; } .rulers #in { padding: 24px 32px 200px; }
   .hd { display: flex; align-items: baseline; gap: 8px; font-size: 12px; opacity: .7; margin-bottom: 8px; } .hd #stepno { margin-left: auto; }
   .step { display: none; } .step.on { display: block; }
+  #sL h1 { text-align: center; margin: 26px 0 22px; line-height: 1.8; } .lang { font-size: 22px; padding: 22px 8px; margin: 14px 0; }
+  html[lang=ja] body { font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", "Noto Sans CJK JP", Meiryo, Arial, sans-serif; }
   .step h1 { font-size: 19px; line-height: 1.35; margin: 4px 0 10px; letter-spacing: 0; }
   .step p { font-size: 14.5px; line-height: 1.65; margin: 7px 0; } .step p.note { font-size: 12px; opacity: .7; }
   .guide { margin: 6px 0 10px; padding-left: 22px; font-size: 14.5px; line-height: 1.75; }
@@ -76,86 +78,84 @@
 <div id="frame100"></div>
 <div id="frame"></div>
 <div id="wrap"><div id="in">
-  <div class="hd"><b>世界Ⅶ 手机测试</b><small>DIAG v5</small><span id="stepno"></span></div>
+  <div class="hd"><b data-i="hd"></b><small>DIAG v6</small><span id="stepno"></span></div>
 
-  <section class="step on" id="s0">
-    <h1>帮忙测试一下这台手机</h1>
-    <ol class="guide">
-      <li>点下面的按钮，手机会<b>自动测试约 30 秒</b>。</li>
-      <li>然后回答 <b>3 个小问题</b>，每个点一两下。</li>
-      <li>全程约 1 分钟，结果会自动发给作者。</li>
-    </ol>
-    <p class="note">只会发送：手机型号、浏览器、屏幕尺寸和测试结果，不含任何个人信息。</p>
-    <button id="go" class="main" disabled>准备中…</button>
-    <p id="loadst" class="note">正在下载测试用的小视频，请稍等几秒。</p>
+  <section class="step on" id="sL">
+    <h1>言語を選んでください<br>请选择语言</h1>
+    <button class="main lang" data-l="ja">日本語</button>
+    <button class="main lang" data-l="zh">中文</button>
+  </section>
+
+  <section class="step" id="s0">
+    <h1 data-i="s0_h"></h1>
+    <ol class="guide"><li data-i="s0_1"></li><li data-i="s0_2"></li><li data-i="s0_3"></li></ol>
+    <p class="note" data-i="s0_note"></p>
+    <button id="go" class="main" disabled></button>
+    <p id="loadst" class="note"></p>
   </section>
 
   <section class="step" id="s1">
-    <h1>正在自动测试</h1>
-    <p class="warn">请不要触碰屏幕，也不要切到别的应用。</p>
+    <h1 data-i="s1_h"></h1>
+    <p class="warn" data-i="s1_warn"></p>
     <div class="bar"><i id="barfill"></i></div>
-    <p id="prog" class="note">马上开始…</p>
+    <p id="prog" class="note" data-i="prog0"></p>
     <div id="vids"></div>
-    <p class="note">上面的小彩条画面在播放是正常的，不用管它。</p>
+    <p class="note" data-i="s1_note"></p>
   </section>
 
   <section class="step" id="s2">
-    <h1>问题 1 / 3：小图的颜色对不对</h1>
-    <p class="do">每张图都应该是：<b>深色背景上一张纯白的圆脸</b>。哪张的脸<b>发灰了</b>或<b>黑白反了</b>，就点它一下（出现红框；再点一下取消）。</p>
-    <p class="sw">对照：<i style="background:#fff"></i> 这是白　<i style="background:#808080"></i> 这是灰</p>
+    <h1 data-i="s2_h"></h1>
+    <p class="do" data-i="s2_do"></p>
+    <p class="sw" data-i="s2_sw"></p>
     <div class="dk" id="dk"></div>
-    <button class="main next" data-to="s3">点好了，下一步</button>
-    <p class="note">如果全部正常，不用点图，直接点“下一步”。</p>
+    <button class="main next" data-to="s3" data-i="s2_next"></button>
+    <p class="note" data-i="s2_note"></p>
   </section>
 
   <section class="step" id="s3">
-    <h1>问题 2 / 3：有没有大播放键</h1>
-    <p class="do">看下面两个框。哪个框里出现了<b>大的圆形播放键 ▶</b>，就点它下面的按钮。</p>
+    <h1 data-i="s3_h"></h1>
+    <p class="do" data-i="s3_do"></p>
     <div class="pp">
-      <div><video id="p1" muted playsinline preload="none"></video><button class="pk" id="pk1">这个框里有</button></div>
-      <div><video id="p2" muted playsinline preload="none"></video><button class="pk" id="pk2">这个框里有</button></div>
+      <div><video id="p1" muted playsinline preload="none"></video><button class="pk" id="pk1" data-i="pk"></button></div>
+      <div><video id="p2" muted playsinline preload="none"></video><button class="pk" id="pk2" data-i="pk"></button></div>
     </div>
-    <button class="main next" data-to="s4">下一步</button>
-    <p class="note">两个框都是空的（没有播放键），直接点“下一步”。</p>
+    <button class="main next" data-to="s4" data-i="s3_next"></button>
+    <p class="note" data-i="s3_note"></p>
   </section>
 
   <section class="step" id="s4">
-    <h1>问题 3 / 3：双指放大</h1>
-    <p class="do">像放大照片那样，用<b>两根手指</b>在下面<b>三个框里各做一次“张开放大”</b>的动作（框上会出现“✓ 试过了”）。</p>
-    <div class="zb"><div id="zA">框 1<br><b id="zAv">在这里放大</b></div><div id="zB">框 2<br><b id="zBv">在这里放大</b></div><div id="zC">框 3<br><b id="zCv">在这里放大</b></div></div>
+    <h1 data-i="s4_h"></h1>
+    <p class="do" data-i="s4_do"></p>
+    <div class="zb"><div id="zA"><span data-i="box1"></span><br><b id="zAv"></b></div><div id="zB"><span data-i="box2"></span><br><b id="zBv"></b></div><div id="zC"><span data-i="box3"></span><br><b id="zCv"></b></div></div>
     <p id="zNow" class="warn"></p>
-    <button class="main" id="more">做完了，提交</button>
-    <p class="note">页面有没有被放大都没关系，照实做一遍就行。如果整个页面被放大了，先用两根手指捏回原来的大小，再点“提交”。</p>
+    <button class="main" id="more" data-i="s4_go"></button>
+    <p class="note" data-i="s4_note"></p>
   </section>
 
   <section class="step" id="s5">
-    <h1 id="endtitle">正在提交…</h1>
+    <h1 id="endtitle"></h1>
     <p id="upst"></p>
     <div id="okbox" style="display:none">
-      <p>把下面这个编号告诉作者就可以了：</p>
+      <p data-i="end_code"></p>
       <div class="rid" id="rid"></div>
-      <p class="note">之后可以关掉这个页面。</p>
+      <p class="note" data-i="end_close"></p>
     </div>
     <div id="fallback" style="display:none">
-      <p class="do">结果没能自动发出去。请点下面的按钮复制，再<b>粘贴到聊天里发给作者</b>。</p>
-      <button id="copy" class="main">复制结果</button>
+      <p class="do" data-i="fb_do"></p>
+      <button id="copy" class="main" data-i="copy"></button>
       <p><small id="cnt"></small><span id="copied"></span></p>
       <textarea id="short" readonly style="height:120px"></textarea>
-      <p class="note">如果按钮复制不了：长按上面的文本框，全选、复制。</p>
+      <p class="note" data-i="fb_note"></p>
     </div>
     <details>
-      <summary>作者让我发截图时，点这里</summary>
-      <ol class="guide">
-        <li>点“显示标尺”，页面四边会出现刻度。</li>
-        <li>按手机的截图键，截一张图。</li>
-        <li>点“选择文件”，选刚才那张截图，等它显示“已上传”。</li>
-      </ol>
-      <button class="pk" id="rulerBtn">显示标尺</button>
+      <summary data-i="shot_sum"></summary>
+      <ol class="guide"><li data-i="shot_1"></li><li data-i="shot_2"></li><li data-i="shot_3"></li></ol>
+      <button class="pk" id="rulerBtn"></button>
       <p><input type="file" id="shot" accept="image/*"></p>
       <p id="shotst"></p>
     </details>
     <details>
-      <summary>详细数据（给作者看的，不用管）</summary>
+      <summary data-i="data_sum"></summary>
       <pre id="sum"></pre>
       <textarea id="out" readonly></textarea>
     </details>
@@ -164,7 +164,7 @@
 <script>
 (function () {
   'use strict';
-  var VER = 'DIAG v5';
+  var VER = 'DIAG v6';
   var UP = 'https://ntfy.sh/wv7d-f431e2a8ce16cadf75';          // 免账号的中转频道：只发诊断数字，不含作品内容
   var RID = (function () { var a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = ''; for (var i = 0; i < 4; i++) r += a.charAt(Math.floor(Math.random() * a.length)); return r; })();
   function send(text) { var c = window.AbortController ? new AbortController() : null, t = setTimeout(function () { if (c) c.abort(); }, 9000);
@@ -172,15 +172,25 @@
       .then(function (r) { clearTimeout(t); if (!r.ok) throw new Error('HTTP ' + r.status); return true; }, function (e) { clearTimeout(t); throw e; }); }
   var $ = function (id) { return document.getElementById(id); };
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  // 两套文字：测试的人开场选语言。回传给作者的数据不分语言
+  var I = {"zh": {"hd": "世界Ⅶ 手机测试", "s0_h": "帮忙测试一下这台手机", "s0_1": "点下面的按钮，手机会<b>自动测试约 30 秒</b>。", "s0_2": "然后回答 <b>3 个小问题</b>，每个点一两下。", "s0_3": "全程约 1 分钟，结果会自动发给作者。", "s0_note": "只会发送：手机型号、浏览器、屏幕尺寸和测试结果，不含任何个人信息。", "go_load": "准备中", "go_ready": "开始测试", "go_fail": "下载失败", "load_wait": "正在下载测试用的小视频，请稍等几秒。", "load_ready": "准备好了。点上面的按钮开始，然后把手拿开，等它自己跑完。", "load_fail": "测试用的小视频没下载下来。请检查网络，然后刷新这个页面再试。", "s1_h": "正在自动测试", "s1_warn": "请不要触碰屏幕，也不要切到别的应用。", "s1_note": "上面的小彩条画面在播放是正常的，不用管它。", "prog0": "马上开始…", "prog": "正在测试第 {1} 项，共 {2} 项…", "prog_last": "最后一项，再等几秒…", "prog_done": "测完了", "s2_h": "问题 1 / 3：小图的颜色对不对", "s2_do": "每张图都应该是：<b>深色背景上一张纯白的圆脸</b>。哪张的脸<b>发灰了</b>或<b>黑白反了</b>，就点它一下（出现红框；再点一下取消）。", "s2_sw": "对照：<i style=\"background:#fff\"></i> 这是白　<i style=\"background:#808080\"></i> 这是灰", "s2_next": "点好了，下一步", "s2_note": "如果全部正常，不用点图，直接点“下一步”。", "s3_h": "问题 2 / 3：有没有大播放键", "s3_do": "看下面两个框。哪个框里出现了<b>大的圆形播放键 ▶</b>，就点它下面的按钮。", "pk": "这个框里有", "s3_next": "下一步", "s3_note": "两个框都是空的（没有播放键），直接点“下一步”。", "s4_h": "问题 3 / 3：双指放大", "s4_do": "像放大照片那样，用<b>两根手指</b>在下面<b>三个框里各做一次“张开放大”</b>的动作（框上会出现“✓ 试过了”）。", "box1": "框 1", "box2": "框 2", "box3": "框 3", "z_here": "在这里放大", "z_done": "✓ 试过了", "z_zoomed": "整个页面被放大了。请用两根手指捏回原来的大小。", "s4_go": "做完了，提交", "s4_note": "页面有没有被放大都没关系，照实做一遍就行。如果整个页面被放大了，先用两根手指捏回原来的大小，再点“提交”。", "end_wait": "正在提交…", "end_wait2": "请稍等几秒。", "end_ok": "✓ 测完了，谢谢", "end_ok2": "结果已经自动发给作者。", "end_code": "把下面这个编号告诉作者就可以了：", "end_close": "之后可以关掉这个页面。", "end_ng": "还差最后一步", "end_ng2": "这台手机连不上接收结果的服务。", "fb_do": "结果没能自动发出去。请点下面的按钮复制，再<b>粘贴到聊天里发给作者</b>。", "copy": "复制结果", "copied": " ✓ 已复制。现在去聊天里粘贴，发给作者", "copy_ng": " 复制不了：长按下面的文本框，全选、复制", "fb_note": "如果按钮复制不了：长按上面的文本框，全选、复制。", "shot_sum": "作者让我发截图时，点这里", "shot_1": "点“显示标尺”，页面四边会出现刻度。", "shot_2": "按手机的截图键，截一张图。", "shot_3": "点下面的选择文件按钮，选刚才那张截图，等它显示“已上传”。", "ruler_on": "显示标尺", "ruler_off": "隐藏标尺", "shot_work": " 处理中…", "shot_up": " 上传中…（{1} KB）", "shot_ok": " ✓ 截图已上传（编号 {1}）", "shot_ng": " ✗ 没传上去（{1}）：请用聊天软件把图发给作者", "shot_bad": "读不了这张图", "shot_conv": "转不了", "data_sum": "详细数据（给作者看的，不用管）", "step_sL": "", "step_s0": "", "step_s1": "自动测试中", "step_s2": "问题 1 / 3", "step_s3": "问题 2 / 3", "step_s4": "问题 3 / 3", "step_s5": ""}, "ja": {"hd": "世界Ⅶ 動作テスト", "s0_h": "このスマートフォンの動作テストにご協力ください", "s0_1": "下のボタンを押すと、<b>約30秒の自動テスト</b>が始まります。", "s0_2": "そのあと<b>3つの簡単な質問</b>に答えます（それぞれ1〜2回タップするだけです）。", "s0_3": "全部で約1分です。結果は自動で作者に送信されます。", "s0_note": "送信されるのは、機種名・ブラウザ・画面サイズ・テスト結果だけです。個人情報は含まれません。", "go_load": "準備中", "go_ready": "テストを始める", "go_fail": "ダウンロード失敗", "load_wait": "テスト用の短い動画をダウンロードしています。数秒お待ちください。", "load_ready": "準備ができました。上のボタンを押したら、画面に触れずに終わるまでお待ちください。", "load_fail": "テスト用の動画をダウンロードできませんでした。通信環境を確認して、このページを再読み込みしてください。", "s1_h": "自動テスト中", "s1_warn": "画面に触れないでください。ほかのアプリにも切り替えないでください。", "s1_note": "上に小さなカラーバーの映像が流れますが、正常です。そのままお待ちください。", "prog0": "まもなく始まります…", "prog": "テスト中：全 {2} 項目のうち {1} 番目…", "prog_last": "最後の項目です。あと数秒…", "prog_done": "完了", "s2_h": "質問 1 / 3：小さな画像の色は正しいですか", "s2_do": "どの画像も本来は<b>暗い背景に真っ白な丸い顔</b>です。顔が<b>灰色っぽい</b>、または<b>白と黒が反転している</b>画像があれば、タップしてください（赤い枠が付きます。もう一度タップすると取り消せます）。", "s2_sw": "見本：<i style=\"background:#fff\"></i> これが白　<i style=\"background:#808080\"></i> これが灰色", "s2_next": "次へ", "s2_note": "すべて正常なら、何もタップせずに「次へ」を押してください。", "s3_h": "質問 2 / 3：大きな再生ボタンは出ていますか", "s3_do": "下の2つの枠を見てください。枠の中に<b>大きな丸い再生ボタン ▶</b> が表示されていたら、その下のボタンを押してください。", "pk": "この枠にある", "s3_next": "次へ", "s3_note": "どちらの枠も空（再生ボタンなし）なら、そのまま「次へ」を押してください。", "s4_h": "質問 3 / 3：2本指で拡大", "s4_do": "写真を拡大するときのように、下の<b>3つの枠それぞれで1回ずつ</b>、<b>2本の指を広げる操作（ピンチアウト）</b>をしてください（枠に「✓ 済み」と表示されます）。", "box1": "枠 1", "box2": "枠 2", "box3": "枠 3", "z_here": "ここで拡大", "z_done": "✓ 済み", "z_zoomed": "ページ全体が拡大されています。2本の指でつまんで元の大きさに戻してください。", "s4_go": "終わったら送信", "s4_note": "ページが拡大されてもされなくても問題ありません。そのまま操作してください。ページ全体が拡大された場合は、2本の指で元の大きさに戻してから「送信」を押してください。", "end_wait": "送信中…", "end_wait2": "数秒お待ちください。", "end_ok": "✓ テスト完了。ご協力ありがとうございました", "end_ok2": "結果は自動で作者に送信されました。", "end_code": "下の番号を作者に伝えてください：", "end_close": "このページは閉じて構いません。", "end_ng": "あと一歩です", "end_ng2": "この端末からは結果を自動送信できませんでした。", "fb_do": "下のボタンで結果をコピーして、<b>チャットに貼り付けて作者に送ってください</b>。", "copy": "結果をコピー", "copied": " ✓ コピーしました。チャットに貼り付けて作者に送ってください", "copy_ng": " コピーできませんでした。下の枠を長押しして「すべて選択」→「コピー」してください", "fb_note": "ボタンでコピーできない場合：上の枠を長押しして「すべて選択」→「コピー」。", "shot_sum": "作者からスクリーンショットを頼まれたら、ここを開く", "shot_1": "「目盛りを表示」を押すと、画面の四辺に目盛りが出ます。", "shot_2": "スマートフォンのスクリーンショット操作で、画面を1枚撮ります。", "shot_3": "下のファイル選択ボタンで今のスクリーンショットを選び、「送信しました」と出るまで待ちます。", "ruler_on": "目盛りを表示", "ruler_off": "目盛りを隠す", "shot_work": " 処理中…", "shot_up": " 送信中…（{1} KB）", "shot_ok": " ✓ 送信しました（番号 {1}）", "shot_ng": " ✗ 送信できませんでした（{1}）。チャットで画像を作者に送ってください", "shot_bad": "画像を読み込めません", "shot_conv": "変換できません", "data_sum": "詳細データ（作者用です。気にしなくて大丈夫です）", "step_sL": "", "step_s0": "", "step_s1": "自動テスト中", "step_s2": "質問 1 / 3", "step_s3": "質問 2 / 3", "step_s4": "質問 3 / 3", "step_s5": ""}};
+  var LANG = 'zh';
+  function T(k) { var v = (I[LANG] && I[LANG][k] !== undefined) ? I[LANG][k] : (I.zh[k] !== undefined ? I.zh[k] : k); for (var i = 1; i < arguments.length; i++) v = v.replace('{' + i + '}', arguments[i]); return v; }
+  var prepState = 'load', prepI = '';
+  function paintPrep() { var g = $('go'), l = $('loadst'); if (prepState === 'fail') { g.textContent = T('go_fail'); l.textContent = T('load_fail'); }
+    else if (prepState === 'ready') { g.textContent = T('go_ready'); l.textContent = T('load_ready'); } else { g.textContent = T('go_load') + (prepI ? ' ' + prepI : '…'); l.textContent = T('load_wait'); } }
+  function setLang(l) { LANG = I[l] ? l : 'zh'; document.documentElement.lang = LANG; var a = document.querySelectorAll('[data-i]'), keep = R.step === 's1' || R.done;
+    for (var i = 0; i < a.length; i++) { if (a[i].id === 'prog' && keep) continue; a[i].innerHTML = T(a[i].getAttribute('data-i')); }
+    paintPrep(); $('rulerBtn').textContent = document.documentElement.classList.contains('rulers') ? T('ruler_off') : T('ruler_on'); $('stepno').textContent = T('step_' + (R.step || 'sL'));
+    try { zoomNow(); } catch (e) {} if (R.step === 's5') { try { endState(); } catch (e) {} } R.lang = LANG; }
   // 一步一屏：只显示当前这一步
-  var STEPNO = { s0: '', s1: '自动测试中', s2: '问题 1 / 3', s3: '问题 2 / 3', s4: '问题 3 / 3', s5: '' };
-  function show(id) { var a = document.querySelectorAll('.step'); for (var i = 0; i < a.length; i++) a[i].classList.toggle('on', a[i].id === id); $('stepno').textContent = STEPNO[id] || ''; $('wrap').scrollTop = 0; R.step = id; }
+  function show(id) { var a = document.querySelectorAll('.step'); for (var i = 0; i < a.length; i++) a[i].classList.toggle('on', a[i].id === id); $('stepno').textContent = T('step_' + id); $('wrap').scrollTop = 0; R.step = id; }
   // 最后一屏：两次上传都成功就显示编号；有一次没成功就请对方复制粘贴
   function endState() {
     var a = R.uploaded, b = R.moreUp; $('rid').textContent = RID;
-    if (a === undefined || b === undefined) { $('endtitle').textContent = '正在提交…'; $('upst').textContent = '请稍等几秒。'; return; }
-    if (a && b) { $('endtitle').textContent = '✓ 测完了，谢谢'; $('upst').className = 'ok'; $('upst').textContent = '结果已经自动发给作者。'; $('okbox').style.display = ''; $('fallback').style.display = 'none'; }
-    else { $('endtitle').textContent = '还差最后一步'; $('upst').className = 'ng'; $('upst').textContent = '这台手机连不上接收结果的服务。'; $('okbox').style.display = 'none'; $('fallback').style.display = '';
+    if (a === undefined || b === undefined) { $('endtitle').textContent = T('end_wait'); $('upst').textContent = T('end_wait2'); return; }
+    if (a && b) { $('endtitle').textContent = T('end_ok'); $('upst').className = 'ok'; $('upst').textContent = T('end_ok2'); $('okbox').style.display = ''; $('fallback').style.display = 'none'; }
+    else { $('endtitle').textContent = T('end_ng'); $('upst').className = 'ng'; $('upst').textContent = T('end_ng2'); $('okbox').style.display = 'none'; $('fallback').style.display = '';
       $('short').value = shortCode() + (R.more ? '\n' + R.more : ''); $('cnt').textContent = ''; }
   }
   var now = function () { return performance.now(); };
@@ -280,11 +290,11 @@
 
   // ---------- 四、双指放大（可选） ----------
   var zMax = { zA: 1, zB: 1, zC: 1 }, zDone = {}, zIn = null;
-  function zoomNow() { var paint = function () { ['zA', 'zB', 'zC'].forEach(function (k) { $(k + 'v').textContent = zDone[k] ? '✓ 试过了' : '在这里放大'; $(k + 'v').className = zDone[k] ? 'ok' : ''; }); };
+  function zoomNow() { var paint = function () { ['zA', 'zB', 'zC'].forEach(function (k) { $(k + 'v').textContent = zDone[k] ? T('z_done') : T('z_here'); $(k + 'v').className = zDone[k] ? 'ok' : ''; }); };
     if (!vv) { paint(); return; }
     var s = vv.scale; if (zIn && s > zMax[zIn]) zMax[zIn] = s;
     paint();
-    $('zNow').textContent = s > 1.02 ? '整个页面被放大了。请用两根手指捏回原来的大小。' : ''; }
+    $('zNow').textContent = s > 1.02 ? T('z_zoomed') : ''; }
   ['zA', 'zB', 'zC'].forEach(function (k) { var two = function (e) { zIn = k; if (e.touches && e.touches.length > 1) { zDone[k] = true; zoomNow(); } };
     $(k).addEventListener('touchstart', two, { passive: true }); $(k).addEventListener('touchmove', two, { passive: true }); });
   var stop = function (e) { e.preventDefault(); };
@@ -316,9 +326,9 @@
   var blobs = {}, V = [], dv = {};
   var policy = {};
   (async function prep() {
-    try { V = await (await fetch('diag/videos.json', { cache: 'no-cache' })).json(); } catch (e) { R.log.push('取不到视频清单: ' + e.name); $('go').textContent = '下载失败'; $('loadst').textContent = '测试用的小视频没下载下来。请检查网络，然后刷新这个页面再试。'; return; }
+    try { V = await (await fetch('diag/videos.json', { cache: 'no-cache' })).json(); } catch (e) { R.log.push('取不到视频清单: ' + e.name); prepState = 'fail'; paintPrep(); return; }
     for (var i = 0; i < V.length; i++) {
-      $('go').textContent = '准备中 ' + (i + 1) + ' / ' + V.length;
+      prepState = 'load'; prepI = (i + 1) + ' / ' + V.length; paintPrep();
       try { var b = await (await fetch('diag/' + V[i].id + '.mp4', { cache: 'no-cache' })).blob(); blobs[V[i].id] = URL.createObjectURL(new Blob([b], { type: 'video/mp4' })); }
       catch (e) { R.log.push('取不到 ' + V[i].id + ': ' + e.name); }
       var f = document.createElement('figure'), v = mkV(); dv[V[i].id] = v; f.appendChild(v); f.appendChild(document.createTextNode(V[i].id.slice(0, 1) + ' ' + V[i].w + 'x' + V[i].h + ' ' + V[i].fps)); $('vids').appendChild(f);
@@ -329,7 +339,7 @@
       policy.noTouch = lastTouch ? { skipped: '已经碰过屏幕，这一项不准' } : await playTest(v0, 2500); policy.noTouchTouched = !!lastTouch; try { v0.pause(); } catch (e) {} v0.remove(); }
     for (var k in dv) if (blobs[k]) dv[k].src = blobs[k];
     await sleep(300);
-    $('go').disabled = false; $('go').textContent = '开始测试'; $('loadst').textContent = '准备好了。点上面的按钮开始，然后把手拿开，等它自己跑完。';
+    $('go').disabled = false; prepState = 'ready'; paintPrep();
   })();
 
   $('go').addEventListener('click', function () {
@@ -349,13 +359,13 @@
 
   async function run(pG, g1, u1, u2, late, uState) {
     var say = function (t, f) { $('prog').textContent = t; if (f !== undefined) $('barfill').style.width = Math.round(f * 100) + '%'; };
-    say('正在测试第 1 项，共 ' + (V.length + 1) + ' 项…', 0.03);
+    say(T('prog', 1, V.length + 1), 0.03);
     policy.inTap = await pG; try { g1.pause(); } catch (e) {} g1.remove();
     // 逐支测解码
     R.video = {};
     for (var i = 0; i < V.length; i++) {
       var s = V[i], v = dv[s.id], r = { spec: s.w + 'x' + s.h + '@' + s.fps + ' L' + s.level + ' ref' + s.ref };
-      say('正在测试第 ' + (i + 1) + ' 项，共 ' + (V.length + 1) + ' 项…', (i + 0.3) / (V.length + 1.6));
+      say(T('prog', i + 1, V.length + 1), (i + 0.3) / (V.length + 1.6));
       r.canPlay = v.canPlayType('video/mp4; codecs="' + s.codec + '"') || 'no';
       if (R.feat.mediaCap) { try { var d = await navigator.mediaCapabilities.decodingInfo({ type: 'file', video: { contentType: 'video/mp4; codecs="' + s.codec + '"', width: s.w, height: s.h, bitrate: s.bitrate, framerate: s.fps } });
         r.cap = (d.supported ? 'S' : 's') + (d.smooth ? 'M' : 'm') + (d.powerEfficient ? 'P' : 'p'); } catch (e) { r.cap = 'err ' + e.name; } }
@@ -366,7 +376,7 @@
       R.video[s.id] = r; await sleep(250);
     }
     // 点按过去 6 秒以上再测“程序自己发起的播放”
-    var wait = 6200 - (now() - tapAt); if (wait > 0) { say('最后一项，再等几秒…', V.length / (V.length + 1.6)); await sleep(wait); }
+    var wait = 6200 - (now() - tapAt); if (wait > 0) { say(T('prog_last'), V.length / (V.length + 1.6)); await sleep(wait); }
     policy.touchedDuring = lastTouch > tapAt + 400;
     late.src = blobs.a_clip; policy.lateFresh = await playTest(late, 3000); try { late.pause(); } catch (e) {} late.remove();
     // 正式网页现在的流程：解锁过的空播放器 → 装视频 → load() → play()
@@ -377,7 +387,7 @@
     u2.src = blobs.a_clip; var t0 = now(); while (now() - t0 < 2500 && !(u2.currentTime > 0.05)) await sleep(60);
     policy.srcOnly = { started: u2.currentTime > 0.05, t: +u2.currentTime.toFixed(2), paused: u2.paused, err: errOf(u2) }; try { u2.pause(); } catch (e) {} u2.remove();
     policy.unlock = uState;
-    say('测完了', 1);
+    say(T('prog_done'), 1);
     finish();
   }
 
@@ -424,7 +434,7 @@
     var sp = function (q) { if (!q) return '?'; if (q.skipped) return '-'; if (q.playingAt !== null && q.playingAt !== undefined && q.t > 0.05) return '✓' + q.playingAt;
       return '✗' + en(q.promise) + (q.paused ? 'P' : 'R') + (q.err ? '(' + q.err.slice(0, 30) + ')' : ''); };
     var u0 = s0.units, u = sN.units, sf = sN.safe;
-    S.push('WV7诊断5 #' + RID + ' ' + R.time.slice(5, 16));
+    S.push('WV7诊断6 #' + RID + ' ' + R.time.slice(5, 16));
     S.push('窗' + ch(x2(s0.inner), x2(sN.inner)) + ' 页' + ch(x2(s0.client), x2(sN.client)) + ' 见' + ch(vvs(s0), vvs(sN)) + ' 屏' + x2(sN.screen) + '@' + sN.dpr);
     S.push('vh' + ch(u0.vh, u.vh) + ' s' + ch(u0.svh, u.svh) + ' l' + ch(u0.lvh, u.lvh) + ' d' + ch(u0.dvh, u.dvh) + ' %' + ch(u0.pct, u.pct) + ' 边' + [n0(sf.top), n0(sf.right), n0(sf.bottom), n0(sf.left)].join(',') +
       ' 高' + seen.ih.join('/') + ' 宽' + seen.iw.join('/') + ' 倍' + (seen.sc.join('/') || '?') + ' 事件' + evn.win + '/' + evn.vv);
@@ -434,7 +444,7 @@
       return v.id.slice(0, 1) + (full ? (slow ? '△' : '✓') + q.playingAt + '/' + q.endedAt + (q.dropped ? '-' + q.dropped : '') : '✗' + en(q.promise) + '@' + q.t + (q.err ? '(' + q.err.slice(0, 40) + ')' : '')) + (r.cap && r.cap !== 'SMP' ? '[' + r.cap + ']' : ''); });
     S.push('片 ' + vs.join(' '));
     S.push('暗 系' + b(R.env.dark) + ' 强' + b(R.env.forceDark) + (R.env.forceDark ? '(' + R.env.canvasColor.split(' / ')[0].replace(/[^\d,]/g, '') + ')' : '') + ' cqw' + b(R.feat.cqw) + ' dvh' + b(R.feat.dvh) + ' 触' + b(R.feat.touchAction) +
-      ' webp' + b(R.feat.webp) + ' gl' + b(R.feat.webgl) + ' 密' + b(R.feat.aesgcm) + ' 省' + b(R.env.saveData) + ' 屏' + b(R.env.coarse) + ' 捏' + [zMax.zA, zMax.zB, zMax.zC].map(function (z) { return z.toFixed(2); }).join('/'));
+      ' webp' + b(R.feat.webp) + ' gl' + b(R.feat.webgl) + ' 密' + b(R.feat.aesgcm) + ' 省' + b(R.env.saveData) + ' 屏' + b(R.env.coarse) + ' 捏' + [zMax.zA, zMax.zB, zMax.zC].map(function (z) { return z.toFixed(2); }).join('/') + ' 语' + LANG);
     var ua = R.env.ua || '', m = ua.match(/\(([^)]*)\)/), tail = ua.split('Gecko) ')[1] || '', h = R.env.uach;
     S.push('UA ' + (m ? m[1] : ua.slice(0, 60)) + ' | ' + tail.replace(/ ?Mobile Safari\/[\d.]+/, '').replace(/ ?Safari\/[\d.]+/, '') + (h && /WebView/.test(h.brands) ? ' | WV' : '') + (h && h.model ? ' | ' + h.model : ''));
     if (R.log.length) S.push('志 ' + R.log.join(';').slice(0, 140));
@@ -442,11 +452,11 @@
   }
   $('copy').addEventListener('click', function () {
     $('short').value = shortCode() + (R.more ? '\n' + R.more : '');
-    var t = $('short'), ok = function () { $('copied').textContent = ' ✓ 已复制。现在去聊天里粘贴，发给作者'; }, old = function () { try { t.removeAttribute('readonly'); t.focus(); t.select(); t.setSelectionRange(0, t.value.length); var r = document.execCommand('copy'); t.setAttribute('readonly', ''); if (r) ok(); else $('copied').textContent = ' 复制不了：长按下面的小文本框全选复制'; } catch (e) { $('copied').textContent = ' 复制不了：长按下面的小文本框全选复制'; } };
+    var t = $('short'), ok = function () { $('copied').textContent = T('copied'); }, old = function () { try { t.removeAttribute('readonly'); t.focus(); t.select(); t.setSelectionRange(0, t.value.length); var r = document.execCommand('copy'); t.setAttribute('readonly', ''); if (r) ok(); else $('copied').textContent = T('copy_ng'); } catch (e) { $('copied').textContent = T('copy_ng'); } };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t.value).then(ok, old); else old();
   });
   var nx = document.querySelectorAll('.next'); for (var ni = 0; ni < nx.length; ni++) nx[ni].addEventListener('click', function () { show(this.getAttribute('data-to')); });
-  $('rulerBtn').addEventListener('click', function () { var on = document.documentElement.classList.toggle('rulers'); this.textContent = on ? '隐藏标尺' : '显示标尺'; if (on) ruler(); });
+  $('rulerBtn').addEventListener('click', function () { var on = document.documentElement.classList.toggle('rulers'); this.textContent = on ? T('ruler_off') : T('ruler_on'); if (on) ruler(); });
   $('more').addEventListener('click', function () {
     var bad = figs.filter(function (f) { return f.el.classList.contains('bad'); }).map(function (f) { return f.n; }), z = sizes();
     var t = '#' + RID + ' 补充\n暗图变了 ' + (bad.join(',') || '无') + ' /共' + figs.length + ' | 大播放键 ①' + ($('pk1').classList.contains('bad') ? '有' : '无') + ' ②' + ($('pk2').classList.contains('bad') ? '有' : '无') +
@@ -456,18 +466,20 @@
     send(t).then(function () { R.moreUp = true; endState(); }, function (e) { R.moreUp = false; R.log.push('补充上传失败 ' + e.name); endState(); });
   });
   $('shot').addEventListener('change', function () {
-    var f = this.files && this.files[0], st = $('shotst'); if (!f) return; st.className = ''; st.textContent = ' 处理中…';
-    var fail = function (w) { st.className = 'ng'; st.textContent = ' ✗ 没传上去（' + w + '）：请用聊天软件把图发给作者'; };
-    var img = new Image(); img.onerror = function () { fail('读不了这张图'); };
+    var f = this.files && this.files[0], st = $('shotst'); if (!f) return; st.className = ''; st.textContent = T('shot_work');
+    var fail = function (w) { st.className = 'ng'; st.textContent = T('shot_ng', w); };
+    var img = new Image(); img.onerror = function () { fail(T('shot_bad')); };
     img.onload = function () { var k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      c.toBlob(function (b) { if (!b) { fail('转不了'); return; } st.textContent = ' 上传中…（' + Math.round(b.size / 1024) + ' KB）';
+      c.toBlob(function (b) { if (!b) { fail(T('shot_conv')); return; } st.textContent = T('shot_up', Math.round(b.size / 1024));
         fetch(UP, { method: 'PUT', body: b, headers: { 'Filename': 'wv7-' + RID + '-' + (Date.now() % 100000) + '.jpg', 'Message': '#' + RID + ' shot ' + c.width + 'x' + c.height }, cache: 'no-store', referrerPolicy: 'no-referrer' })
-          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); st.className = 'ok'; st.textContent = ' ✓ 截图已上传（编号 ' + RID + '）'; }).catch(function (e) { fail(e.name); }); }, 'image/jpeg', 0.82); };
+          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); st.className = 'ok'; st.textContent = T('shot_ok', RID); }).catch(function (e) { fail(e.name); }); }, 'image/jpeg', 0.82); };
     img.src = URL.createObjectURL(f);
   });
+  R.step = 'sL'; setLang(/^ja/i.test(navigator.language || '') ? 'ja' : 'zh');
+  var lb = document.querySelectorAll('.lang'); for (var li = 0; li < lb.length; li++) lb[li].addEventListener('click', function () { setLang(this.getAttribute('data-l')); show('s0'); });
   // 只给作者出预览图用：网址后面加 ?show=s2 之类，直接显示那一屏
-  (function () { var q = location.search.match(/[?&]show=(s[0-5])/); if (!q) return; show(q[1]); if (q[1] === 's1') { $('prog').textContent = '正在测试第 4 项，共 9 项…'; $('barfill').style.width = '40%'; }
+  (function () { var q = location.search.match(/[?&]show=(s[0-5L])/), lq = location.search.match(/[?&]lang=(ja|zh)/); if (lq) setLang(lq[1]); if (!q) return; show(q[1]); if (q[1] === 's1') { $('prog').textContent = T('prog', 4, 9); $('barfill').style.width = '40%'; }
     if (q[1] === 's5') { R.uploaded = R.moreUp = !/fail/.test(location.search); R.size2 = R.size0; try { endState(); } catch (e) {} } })();
   window.__diag = R; R.rid = RID;
 })();
