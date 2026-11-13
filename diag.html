@@ -41,6 +41,11 @@
   .dk { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; } .dk figure { margin: 0; font-size: 8px; text-align: center; }
   .dk img, .dk canvas, .dk .bgi { width: 46px; height: 46px; display: block; } .dk iframe { width: 104px; height: 52px; border: 0; display: block; }
   .dk .big img { width: 132px; height: 132px; }
+  .dk figure { position: relative; } .dk figure .hit { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+  .dk figure.bad { outline: 2px solid #ff5a4a; outline-offset: 2px; } .dk figure.bad::after { content: "变了"; position: absolute; right: 0; top: 0; background: #ff5a4a; color: #fff; font-size: 8px; padding: 0 2px; }
+  .pk, #more { padding: 8px 12px; border-radius: 9px; border: 1px solid rgba(236, 231, 220, .5); background: #1c2632; color: #fff; font-size: 13px; margin: 4px 6px 4px 0; }
+  .pk.bad { background: #7a2a22; border-color: #ff5a4a; } #more { border-color: #35d0ff; background: #12324a; font-size: 15px; padding: 11px 14px; }
+  #upst { font-size: 12.5px; margin: 2px 0 4px; } #shot { font-size: 12px; color: #cfe; max-width: 100%; }
   .sw i { display: inline-block; width: 30px; height: 18px; vertical-align: middle; border: 1px solid #456; }
   .zb { display: flex; gap: 6px; } .zb div { flex: 1; height: 86px; border-radius: 8px; border: 1px dashed #8aa; font-size: 10px; padding: 4px; box-sizing: border-box; background: #18222d; }
   #zA { touch-action: none; }
@@ -51,29 +56,42 @@
 <div id="frame100"></div>
 <div id="frame"></div>
 <div id="wrap"><div id="in">
-  <h1>世界Ⅶ 诊断页 <small>DIAG v2</small></h1>
-  <p id="tip"><small>青色实线框和四边的标尺＝正式网页会用的画面大小；橙色虚线框＝浏览器说的“整页”。<b>先别滚动，点下面的按钮，等它跑完（约 30 秒，期间别碰屏幕），截第一屏；再点“复制结果”发给作者。</b></small></p>
+  <h1>世界Ⅶ 诊断页 <small>DIAG v3</small></h1>
+  <p id="tip"><small>青色实线框和四边的标尺＝正式网页会用的画面大小；橙色虚线框＝浏览器说的“整页”。<b>点下面的按钮，等它跑完（约 30 秒，期间别碰屏幕）。</b>跑完后结果会自动发给作者，只含机型、浏览器、屏幕尺寸和测试结果。</small></p>
   <button id="go" disabled>准备中… LOADING</button>
   <button id="copy" style="display:none">复制结果 COPY</button><small id="cnt"></small><span id="copied"></span>
+  <p id="upst"></p>
   <pre id="sum">还没开始</pre>
   <textarea id="short" readonly style="display:none;height:96px"></textarea>
   <h2>测试视频（彩条）</h2>
   <div id="vids"></div>
   <h2>深色模式会不会改图（原图：暗底上一个白色圆脸，黑色线条）</h2>
+  <p><b>哪张的脸不白了、或者黑白反了，就点它一下（会标红）。</b>都正常就不用点。</p>
   <p class="sw">色块对照：<i style="background:#fff"></i> 白 <i style="background:#808080"></i> 灰 <i style="background:#000"></i> 黑</p>
   <div class="dk" id="dk"></div>
   <h2>视频没播之前长什么样（有的浏览器会显示一个大播放键）</h2>
   <p class="poster">① 不设封面 <video id="p1" muted playsinline preload="none"></video>　② 设透明封面 <video id="p2" muted playsinline preload="none"></video></p>
+  <p>看到大播放键就点：<button class="pk" id="pk1">① 有大播放键</button><button class="pk" id="pk2">② 有大播放键</button></p>
   <h2>可选：双指放大测试（在每个框里各捏一下，看整页会不会被放大）</h2>
   <div class="zb"><div id="zA">甲：声明触摸归网页<br><b id="zAv">—</b></div><div id="zB">乙：什么都不设<br><b id="zBv">—</b></div><div id="zC">丙：脚本拦截<br><b id="zCv">—</b></div></div>
   <p id="zNow"></p>
+  <h2>上面三栏看完了，点这里把点选的结果也传上去</h2>
+  <button id="more">上传补充结果</button><span id="morest"></span>
+  <h2>可选：传一张截图（作者要你截图时才用）</h2>
+  <p><small>先按手机的截图键截好，再点下面选那张图。</small></p>
+  <input type="file" id="shot" accept="image/*"><span id="shotst"></span>
   <h2>完整数据（很长，一般不用发；需要时长按全选复制）</h2>
   <textarea id="out" readonly></textarea>
 </div></div>
 <script>
 (function () {
   'use strict';
-  var VER = 'DIAG v2';
+  var VER = 'DIAG v3';
+  var UP = 'https://ntfy.sh/wv7d-f431e2a8ce16cadf75';          // 免账号的中转频道：只发诊断数字，不含作品内容
+  var RID = (function () { var a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = ''; for (var i = 0; i < 4; i++) r += a.charAt(Math.floor(Math.random() * a.length)); return r; })();
+  function send(text) { var c = window.AbortController ? new AbortController() : null, t = setTimeout(function () { if (c) c.abort(); }, 9000);
+    return fetch(UP, { method: 'POST', body: text, signal: c ? c.signal : undefined, cache: 'no-store', referrerPolicy: 'no-referrer' })
+      .then(function (r) { clearTimeout(t); if (!r.ok) throw new Error('HTTP ' + r.status); return true; }, function (e) { clearTimeout(t); throw e; }); }
   var $ = function (id) { return document.getElementById(id); };
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var now = function () { return performance.now(); };
@@ -144,13 +162,15 @@
   if (window.crypto && crypto.subtle) crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']).then(function () { R.feat.aesgcm = true; }).catch(function () { R.feat.aesgcm = false; });
 
   // ---------- 三、深色模式改不改图 ----------
+  var figs = [];
   (function () {
     var c = document.createElement('canvas'); c.width = c.height = 132; var g = c.getContext('2d');
     g.fillStyle = '#0b1016'; g.fillRect(0, 0, 132, 132); g.fillStyle = '#fff'; g.beginPath(); g.arc(66, 70, 48, 0, 7); g.fill();
     g.strokeStyle = '#000'; g.lineWidth = 3; g.beginPath(); g.arc(50, 60, 6, 0, 7); g.stroke(); g.beginPath(); g.arc(82, 60, 6, 0, 7); g.stroke(); g.beginPath(); g.arc(66, 76, 20, .3, 2.84); g.stroke();
     g.beginPath(); g.moveTo(22, 40); g.lineTo(66, 16); g.lineTo(110, 40); g.stroke();
     var url = c.toDataURL('image/png'), jpg = c.toDataURL('image/jpeg', .9), dk = $('dk');
-    var fig = function (cap, el, cls) { var f = document.createElement('figure'); if (cls) f.className = cls; f.appendChild(el); f.appendChild(document.createTextNode(cap)); dk.appendChild(f); return f; };
+    var fig = function (cap, el, cls) { var f = document.createElement('figure'), h = document.createElement('div'); if (cls) f.className = cls; f.appendChild(el); f.appendChild(document.createTextNode(cap)); h.className = 'hit'; f.appendChild(h);
+      h.addEventListener('click', function () { f.classList.toggle('bad'); }); figs.push({ n: parseInt(cap, 10), el: f }); dk.appendChild(f); return f; };
     var im = function (src) { var i = new Image(); i.src = src; i.alt = ''; return i; };
     fig('1 大图', im(jpg), 'big');
     fig('2 小图', im(jpg));
@@ -166,6 +186,7 @@
     fig('10 子页：only light', fr('<meta name="color-scheme" content="only light">'));
     fig('11 子页：only dark', fr('<meta name="color-scheme" content="only dark"><style>:root{color-scheme:only dark}</style>'));
   })();
+  ['pk1', 'pk2'].forEach(function (k) { $(k).addEventListener('click', function () { this.classList.toggle('bad'); }); });
   $('p2').poster = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 
   // ---------- 四、双指放大（可选） ----------
@@ -296,8 +317,12 @@
     if (R.log.length) L.push('日志 ' + R.log.join(' ; '));
     $('sum').textContent = L.join('\n');
     var full = L.join('\n') + '\n\n----- 原始数据 -----\n' + JSON.stringify(R);
-    shortCode();
-    $('out').value = full; $('copy').style.display = ''; $('go').textContent = '跑完了：截这一屏，再点“复制结果”（短码，一条消息能发完）'; $('go').style.cssText = 'padding:5px 8px;font-size:12px;margin:3px 0'; $('tip').style.display = 'none'; R.done = true; window.__diag = R;
+    var sc = shortCode();
+    var extra = '补 ' + [R.feat.gpu, 'mem' + R.env.mem, 'cpu' + R.env.cores, R.env.lang, R.env.netType, 'tex' + R.feat.maxTex].join(' | ') + '\nUA全 ' + R.env.ua + (R.env.uach ? '\n牌 ' + R.env.uach.brands : '');
+    $('upst').className = ''; $('upst').textContent = '正在把结果发给作者…';
+    send('#' + RID + ' 结果\n' + sc + '\n' + extra).then(function () { R.uploaded = true; $('upst').className = 'ok'; $('upst').textContent = '✓ 结果已自动发给作者。编号 ' + RID + '，告诉作者这四个字就行'; },
+      function (e) { R.uploaded = false; R.log.push('上传失败 ' + e.name + ' ' + (e.message || '')); $('upst').className = 'ng'; $('upst').textContent = '✗ 没传上去（' + e.name + '）。请点“复制结果”，把文字发给作者'; });
+    $('out').value = full; $('copy').style.display = ''; $('go').textContent = '跑完了（编号 ' + RID + '）'; $('go').style.cssText = 'padding:5px 8px;font-size:12px;margin:3px 0'; $('tip').style.display = 'none'; R.done = true; window.__diag = R;
   }
   // 短码：几百个字，聊天软件一条能发完（“>”左边是刚打开时的数，右边是跑完时的数）
   function shortCode() {
@@ -308,7 +333,7 @@
     var sp = function (q) { if (!q) return '?'; if (q.skipped) return '-'; if (q.playingAt !== null && q.playingAt !== undefined && q.t > 0.05) return '✓' + q.playingAt;
       return '✗' + en(q.promise) + (q.paused ? 'P' : 'R') + (q.err ? '(' + q.err.slice(0, 30) + ')' : ''); };
     var u0 = s0.units, u = sN.units, sf = sN.safe;
-    S.push('WV7诊断2 ' + R.time.slice(5, 16));
+    S.push('WV7诊断3 #' + RID + ' ' + R.time.slice(5, 16));
     S.push('窗' + ch(x2(s0.inner), x2(sN.inner)) + ' 页' + ch(x2(s0.client), x2(sN.client)) + ' 见' + ch(vvs(s0), vvs(sN)) + ' 屏' + x2(sN.screen) + '@' + sN.dpr);
     S.push('vh' + ch(u0.vh, u.vh) + ' s' + ch(u0.svh, u.svh) + ' l' + ch(u0.lvh, u.lvh) + ' d' + ch(u0.dvh, u.dvh) + ' %' + ch(u0.pct, u.pct) + ' 边' + [n0(sf.top), n0(sf.right), n0(sf.bottom), n0(sf.left)].join(',') +
       ' 高' + seen.ih.join('/') + ' 宽' + seen.iw.join('/') + ' 倍' + (seen.sc.join('/') || '?') + ' 事件' + evn.win + '/' + evn.vv);
@@ -329,7 +354,26 @@
     var t = $('short'), ok = function () { $('copied').textContent = ' 已复制，粘贴发给作者'; }, old = function () { try { t.removeAttribute('readonly'); t.focus(); t.select(); t.setSelectionRange(0, t.value.length); var r = document.execCommand('copy'); t.setAttribute('readonly', ''); if (r) ok(); else $('copied').textContent = ' 复制不了：长按下面的小文本框全选复制'; } catch (e) { $('copied').textContent = ' 复制不了：长按下面的小文本框全选复制'; } };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t.value).then(ok, old); else old();
   });
-  window.__diag = R;
+  $('more').addEventListener('click', function () {
+    var bad = figs.filter(function (f) { return f.el.classList.contains('bad'); }).map(function (f) { return f.n; }), z = sizes();
+    var t = '#' + RID + ' 补充\n暗图变了 ' + (bad.join(',') || '无') + ' /共' + figs.length + ' | 大播放键 ①' + ($('pk1').classList.contains('bad') ? '有' : '无') + ' ②' + ($('pk2').classList.contains('bad') ? '有' : '无') +
+      ' | 捏 ' + [zMax.zA, zMax.zB, zMax.zC].map(function (v) { return v.toFixed(2); }).join('/') + ' 现倍' + (vv ? vv.scale.toFixed(2) : '?') +
+      '\n窗' + z.inner.join('x') + ' 页' + z.client.join('x') + ' 见' + (z.vv ? z.vv.w + 'x' + z.vv.h : '?') + ' 高' + seen.ih.join('/') + ' 事件' + evn.win + '/' + evn.vv + ' 强' + (R.env.forceDark ? 1 : 0);
+    R.more = t; $('morest').className = ''; $('morest').textContent = ' 上传中…';
+    send(t).then(function () { $('morest').className = 'ok'; $('morest').textContent = ' ✓ 已上传（编号 ' + RID + '）'; }, function (e) { $('morest').className = 'ng'; $('morest').textContent = ' ✗ 没传上去（' + e.name + '）：请把这一屏截图发给作者'; });
+  });
+  $('shot').addEventListener('change', function () {
+    var f = this.files && this.files[0], st = $('shotst'); if (!f) return; st.className = ''; st.textContent = ' 处理中…';
+    var fail = function (w) { st.className = 'ng'; st.textContent = ' ✗ 没传上去（' + w + '）：请用聊天软件把图发给作者'; };
+    var img = new Image(); img.onerror = function () { fail('读不了这张图'); };
+    img.onload = function () { var k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(function (b) { if (!b) { fail('转不了'); return; } st.textContent = ' 上传中…（' + Math.round(b.size / 1024) + ' KB）';
+        fetch(UP, { method: 'PUT', body: b, headers: { 'Filename': 'wv7-' + RID + '-' + (Date.now() % 100000) + '.jpg', 'Message': '#' + RID + ' shot ' + c.width + 'x' + c.height }, cache: 'no-store', referrerPolicy: 'no-referrer' })
+          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); st.className = 'ok'; st.textContent = ' ✓ 截图已上传（编号 ' + RID + '）'; }).catch(function (e) { fail(e.name); }); }, 'image/jpeg', 0.82); };
+    img.src = URL.createObjectURL(f);
+  });
+  window.__diag = R; R.rid = RID;
 })();
 </script>
 </body>
