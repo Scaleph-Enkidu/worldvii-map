@@ -493,7 +493,7 @@
   const meta = await fetch('meta.json', { cache: 'no-cache' }).then((r) => r.json());
   // 版の食い違い防止：このページの版番号と、サイトのデータ（meta.json）の版番号が違えば読み込み直す。
   // 古いページを開いたまま新しい画像を取りに行くと、地名と画像がずれ、境界の決まりも古いままになる
-  const BUILD = 23;
+  const BUILD = 24;
   const fresh = (b) => {          // 同じ版番号では 1 回だけ（アドレスに ?b= が付いていれば、もう試した）
     const q = '?b=' + encodeURIComponent(b);
     if (location.search === q) return false;
