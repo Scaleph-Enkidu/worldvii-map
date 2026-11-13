@@ -24,7 +24,7 @@
   .nm { position: absolute; font: 8px/1 Consolas, "Courier New", monospace; color: #9fe6ff; white-space: nowrap; }
   .rv.l .nm { left: 7px; transform: translateY(-50%); } .rv.r .nm { right: 7px; transform: translateY(-50%); }
   .rh.t .nm { top: 6px; transform: translateX(-50%); } .rh.b .nm { bottom: 6px; transform: translateX(-50%); }
-  #wrap { position: fixed; left: 26px; right: 26px; top: 19px; bottom: 19px; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior: contain; }
+  #wrap { position: fixed; left: 26px; right: 26px; top: 19px; bottom: 19px; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: manipulation; overscroll-behavior: contain; }
   #in { padding: 6px 6px 220px; }
   h1 { font-size: 15px; font-weight: 600; margin: 0 0 2px; letter-spacing: .08em; }
   h2 { font-size: 12px; font-weight: 600; margin: 14px 0 4px; color: #9fe6ff; border-bottom: 1px solid rgba(236, 231, 220, .2); padding-bottom: 2px; }
@@ -63,11 +63,12 @@
   details { margin-top: 18px; border-top: 1px solid rgba(236, 231, 220, .15); padding-top: 6px; } summary { font-size: 13px; opacity: .8; padding: 7px 0; }
   .pp { display: flex; gap: 12px; margin: 10px 0; } .pp > div { flex: 1; text-align: center; } .pp video { width: 100%; aspect-ratio: 16 / 9; background: #223; display: block; margin-bottom: 6px; }
   .step .dk img, .step .dk canvas, .step .dk .bgi { width: 48px; height: 48px; } .step .dk .big img { width: 84px; height: 84px; } .step .dk iframe { width: 96px; height: 48px; } .step .dk { gap: 8px; margin: 8px 0; } .step .dk figure { font-size: 10px; line-height: 1.3; }
-  .step .zb div { height: 104px; font-size: 13px; text-align: center; padding-top: 22px; } .step .zb b.ok { color: #7ee08a; }
+  .step .zb { flex-direction: column; gap: 10px; margin: 10px 0; } .step .zb div { flex: none; height: 100px; font-size: 15px; text-align: center; padding-top: 26px; border-width: 2px; } .step .zb b { font-size: 16px; } .step .zb b.ok { color: #7ee08a; }
+  @media (orientation: landscape) { .step .zb { flex-direction: row; } .step .zb div { flex: 1; } }
   #s1 #vids figure { font-size: 0; width: 11%; }
   .sw i { display: inline-block; width: 30px; height: 18px; vertical-align: middle; border: 1px solid #456; }
   .zb { display: flex; gap: 6px; } .zb div { flex: 1; height: 86px; border-radius: 8px; border: 1px dashed #8aa; font-size: 10px; padding: 4px; box-sizing: border-box; background: #18222d; }
-  #zA { touch-action: none; }
+  #zA { touch-action: none; } #zB, #zC { touch-action: auto; }
   .poster video { width: 96px; height: 54px; background: #223; display: inline-block; }
 </style>
 </head>
@@ -75,7 +76,7 @@
 <div id="frame100"></div>
 <div id="frame"></div>
 <div id="wrap"><div id="in">
-  <div class="hd"><b>世界Ⅶ 手机测试</b><small>DIAG v4</small><span id="stepno"></span></div>
+  <div class="hd"><b>世界Ⅶ 手机测试</b><small>DIAG v5</small><span id="stepno"></span></div>
 
   <section class="step on" id="s0">
     <h1>帮忙测试一下这台手机</h1>
@@ -120,7 +121,7 @@
 
   <section class="step" id="s4">
     <h1>问题 3 / 3：双指放大</h1>
-    <p class="do">像放大照片那样，用<b>两根手指</b>在下面<b>三个框里各做一次“张开放大”</b>的动作。</p>
+    <p class="do">像放大照片那样，用<b>两根手指</b>在下面<b>三个框里各做一次“张开放大”</b>的动作（框上会出现“✓ 试过了”）。</p>
     <div class="zb"><div id="zA">框 1<br><b id="zAv">在这里放大</b></div><div id="zB">框 2<br><b id="zBv">在这里放大</b></div><div id="zC">框 3<br><b id="zCv">在这里放大</b></div></div>
     <p id="zNow" class="warn"></p>
     <button class="main" id="more">做完了，提交</button>
@@ -163,7 +164,7 @@
 <script>
 (function () {
   'use strict';
-  var VER = 'DIAG v4';
+  var VER = 'DIAG v5';
   var UP = 'https://ntfy.sh/wv7d-f431e2a8ce16cadf75';          // 免账号的中转频道：只发诊断数字，不含作品内容
   var RID = (function () { var a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = ''; for (var i = 0; i < 4; i++) r += a.charAt(Math.floor(Math.random() * a.length)); return r; })();
   function send(text) { var c = window.AbortController ? new AbortController() : null, t = setTimeout(function () { if (c) c.abort(); }, 9000);
@@ -423,7 +424,7 @@
     var sp = function (q) { if (!q) return '?'; if (q.skipped) return '-'; if (q.playingAt !== null && q.playingAt !== undefined && q.t > 0.05) return '✓' + q.playingAt;
       return '✗' + en(q.promise) + (q.paused ? 'P' : 'R') + (q.err ? '(' + q.err.slice(0, 30) + ')' : ''); };
     var u0 = s0.units, u = sN.units, sf = sN.safe;
-    S.push('WV7诊断4 #' + RID + ' ' + R.time.slice(5, 16));
+    S.push('WV7诊断5 #' + RID + ' ' + R.time.slice(5, 16));
     S.push('窗' + ch(x2(s0.inner), x2(sN.inner)) + ' 页' + ch(x2(s0.client), x2(sN.client)) + ' 见' + ch(vvs(s0), vvs(sN)) + ' 屏' + x2(sN.screen) + '@' + sN.dpr);
     S.push('vh' + ch(u0.vh, u.vh) + ' s' + ch(u0.svh, u.svh) + ' l' + ch(u0.lvh, u.lvh) + ' d' + ch(u0.dvh, u.dvh) + ' %' + ch(u0.pct, u.pct) + ' 边' + [n0(sf.top), n0(sf.right), n0(sf.bottom), n0(sf.left)].join(',') +
       ' 高' + seen.ih.join('/') + ' 宽' + seen.iw.join('/') + ' 倍' + (seen.sc.join('/') || '?') + ' 事件' + evn.win + '/' + evn.vv);
