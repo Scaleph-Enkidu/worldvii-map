@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<!-- 视口写法和正式网页一模一样，量出来的数才对得上 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0e141c">
+<title>WORLD VII / DIAG</title>
+<style>
+  /* 和正式网页一样：整页不滚动、深色底、不声明深色模式 */
+  html, body { margin: 0; height: 100%; background: #0e141c; color: #ece7dc; overflow: hidden;
+    font: 13px/1.5 -apple-system, "Hiragino Sans", "Yu Gothic", "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif; }
+  /* 标尺框：和正式网页的画面同一种定法（固定定位，宽高取窗口宽高的像素数） */
+  #frame { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 30; outline: 2px solid #35d0ff; outline-offset: -2px; }
+  #frame100 { position: fixed; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 29; outline: 2px dashed #ff9d3c; outline-offset: -5px; }
+  .rv, .rh { position: absolute; background: rgba(14, 20, 28, .82); }
+  .rv { top: 0; bottom: 0; width: 22px; } .rv.l { left: 0; } .rv.r { right: 0; }
+  .rh { left: 0; right: 0; height: 15px; } .rh.t { top: 0; } .rh.b { bottom: 0; }
+  .tk { position: absolute; background: #35d0ff; }
+  .rv .tk { height: 1px; width: 5px; } .rv.l .tk { left: 0; } .rv.r .tk { right: 0; }
+  .rv .tk.m { width: 9px; } .rh .tk { width: 1px; height: 4px; } .rh.t .tk { top: 0; } .rh.b .tk { bottom: 0; } .rh .tk.m { height: 7px; }
+  .nm { position: absolute; font: 8px/1 Consolas, "Courier New", monospace; color: #9fe6ff; white-space: nowrap; }
+  .rv.l .nm { left: 7px; transform: translateY(-50%); } .rv.r .nm { right: 7px; transform: translateY(-50%); }
+  .rh.t .nm { top: 6px; transform: translateX(-50%); } .rh.b .nm { bottom: 6px; transform: translateX(-50%); }
+  #wrap { position: fixed; left: 26px; right: 26px; top: 19px; bottom: 19px; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior: contain; }
+  #in { padding: 6px 6px 220px; }
+  h1 { font-size: 15px; font-weight: 600; margin: 0 0 2px; letter-spacing: .08em; }
+  h2 { font-size: 12px; font-weight: 600; margin: 14px 0 4px; color: #9fe6ff; border-bottom: 1px solid rgba(236, 231, 220, .2); padding-bottom: 2px; }
+  p { margin: 3px 0; } small { opacity: .7; }
+  #go { display: block; width: 100%; margin: 8px 0; padding: 16px 8px; border-radius: 12px; border: 1px solid #35d0ff; background: #12324a; color: #fff; font-size: 17px; font-weight: 600; }
+  #go[disabled] { opacity: .5; border-color: #667; background: #222a33; }
+  #copy { padding: 9px 14px; border-radius: 9px; border: 1px solid rgba(236, 231, 220, .5); background: #1c2632; color: #fff; font-size: 14px; margin: 4px 6px 4px 0; }
+  pre, textarea { font: 10.5px/1.45 Consolas, "Courier New", monospace; white-space: pre-wrap; word-break: break-all; margin: 4px 0; }
+  #sum { background: #121a24; border: 1px solid rgba(236, 231, 220, .25); border-radius: 8px; padding: 6px 8px; }
+  textarea { width: 100%; height: 150px; box-sizing: border-box; background: #0a0f15; color: #cfe; border: 1px solid #456; border-radius: 6px; }
+  .ok { color: #7ee08a; } .ng { color: #ff7b6b; } .wn { color: #ffd166; }
+  #vids { display: flex; flex-wrap: wrap; gap: 4px; } #vids figure { margin: 0; width: 23%; font-size: 8px; text-align: center; }
+  #vids video { width: 100%; aspect-ratio: 16 / 9; background: #000; display: block; }
+  .dk { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; } .dk figure { margin: 0; font-size: 8px; text-align: center; }
+  .dk img, .dk canvas, .dk .bgi { width: 46px; height: 46px; display: block; } .dk iframe { width: 104px; height: 52px; border: 0; display: block; }
+  .dk .big img { width: 132px; height: 132px; }
+  .sw i { display: inline-block; width: 30px; height: 18px; vertical-align: middle; border: 1px solid #456; }
+  .zb { display: flex; gap: 6px; } .zb div { flex: 1; height: 86px; border-radius: 8px; border: 1px dashed #8aa; font-size: 10px; padding: 4px; box-sizing: border-box; background: #18222d; }
+  #zA { touch-action: none; }
+  .poster video { width: 96px; height: 54px; background: #223; display: inline-block; }
+</style>
+</head>
+<body>
+<div id="frame100"></div>
+<div id="frame"></div>
+<div id="wrap"><div id="in">
+  <h1>世界Ⅶ 诊断页 <small>DIAG v1</small></h1>
+  <p id="tip"><small>青色实线框和四边的标尺＝正式网页会用的画面大小；橙色虚线框＝浏览器说的“整页”。<b>先别滚动，点下面的按钮，等它跑完（约 30 秒，期间别碰屏幕），截第一屏；再点“复制结果”发给作者。</b></small></p>
+  <button id="go" disabled>准备中… LOADING</button>
+  <pre id="sum">还没开始</pre>
+  <button id="copy" style="display:none">复制结果 COPY</button><span id="copied"></span>
+  <h2>测试视频（彩条）</h2>
+  <div id="vids"></div>
+  <h2>深色模式会不会改图（原图：暗底上一个白色圆脸，黑色线条）</h2>
+  <p class="sw">色块对照：<i style="background:#fff"></i> 白 <i style="background:#808080"></i> 灰 <i style="background:#000"></i> 黑</p>
+  <div class="dk" id="dk"></div>
+  <h2>视频没播之前长什么样（有的浏览器会显示一个大播放键）</h2>
+  <p class="poster">① 不设封面 <video id="p1" muted playsinline preload="none"></video>　② 设透明封面 <video id="p2" muted playsinline preload="none"></video></p>
+  <h2>可选：双指放大测试（在每个框里各捏一下，看整页会不会被放大）</h2>
+  <div class="zb"><div id="zA">甲：声明触摸归网页<br><b id="zAv">—</b></div><div id="zB">乙：什么都不设<br><b id="zBv">—</b></div><div id="zC">丙：脚本拦截<br><b id="zCv">—</b></div></div>
+  <p id="zNow"></p>
+  <h2>完整结果</h2>
+  <textarea id="out" readonly></textarea>
+</div></div>
+<script>
+(function () {
+  'use strict';
+  var VER = 'DIAG v1';
+  var $ = function (id) { return document.getElementById(id); };
+  var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  var now = function () { return performance.now(); };
+  var R = { ver: VER, time: new Date().toISOString(), log: [] };
+  var lastTouch = 0, tapAt = 0;
+  ['touchstart', 'touchend', 'pointerdown', 'mousedown', 'keydown'].forEach(function (n) { document.addEventListener(n, function () { lastTouch = now(); }, true); });
+  window.addEventListener('error', function (e) { R.log.push('脚本错误: ' + e.message + ' @' + e.lineno); });
+  window.addEventListener('unhandledrejection', function (e) { R.log.push('未处理的拒绝: ' + (e.reason && (e.reason.name + ' ' + e.reason.message))); });
+
+  // ---------- 一、标尺框（和正式网页同一种定法） ----------
+  var vv = window.visualViewport;
+  function ruler() {
+    var w = window.innerWidth, h = window.innerHeight, f = $('frame');
+    f.style.width = w + 'px'; f.style.height = h + 'px'; f.textContent = '';
+    var mk = function (cls) { var d = document.createElement('div'); d.className = cls; f.appendChild(d); return d; };
+    var L = mk('rv l'), Rr = mk('rv r'), T = mk('rh t'), B = mk('rh b'), y, x, t, n;
+    for (y = 0; y <= h; y += 10) { [L, Rr].forEach(function (s) { t = document.createElement('div'); t.className = 'tk' + (y % 50 ? '' : ' m'); t.style.top = y + 'px'; s.appendChild(t);
+      if (y % 50 === 0 && y > 20 && y < h - 8) { n = document.createElement('div'); n.className = 'nm'; n.style.top = y + 'px'; n.textContent = y; s.appendChild(n); } }); }
+    for (x = 0; x <= w; x += 10) { [T, B].forEach(function (s) { t = document.createElement('div'); t.className = 'tk' + (x % 50 ? '' : ' m'); t.style.left = x + 'px'; s.appendChild(t);
+      if (x % 50 === 0 && x > 20 && x < w - 12) { n = document.createElement('div'); n.className = 'nm'; n.style.left = x + 'px'; n.textContent = x; s.appendChild(n); } }); }
+  }
+  function px(css, prop) { var d = document.createElement('div'); d.style.cssText = 'position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;' + css; document.body.appendChild(d);
+    var v = prop ? getComputedStyle(d)[prop] : d.getBoundingClientRect().height; d.remove(); return typeof v === 'number' ? Math.round(v * 100) / 100 : v; }
+  var seen = { ih: [], iw: [], sc: [] };
+  function sizes() {
+    var de = document.documentElement, s = {
+      inner: [window.innerWidth, window.innerHeight], outer: [window.outerWidth, window.outerHeight], client: [de.clientWidth, de.clientHeight],
+      screen: [screen.width, screen.height], avail: [screen.availWidth, screen.availHeight], dpr: Math.round(window.devicePixelRatio * 100) / 100,
+      vv: vv ? { w: +vv.width.toFixed(2), h: +vv.height.toFixed(2), scale: +vv.scale.toFixed(3), offL: +vv.offsetLeft.toFixed(1), offT: +vv.offsetTop.toFixed(1), pageT: +vv.pageTop.toFixed(1) } : null,
+      units: { vh: px('height:100vh'), svh: px('height:100svh'), lvh: px('height:100lvh'), dvh: px('height:100dvh'), pct: px('height:100%'), fill: px('height:-webkit-fill-available') },
+      safe: { top: px('padding-top:env(safe-area-inset-top)', 'paddingTop'), right: px('padding-right:env(safe-area-inset-right)', 'paddingRight'),
+              bottom: px('padding-bottom:env(safe-area-inset-bottom)', 'paddingBottom'), left: px('padding-left:env(safe-area-inset-left)', 'paddingLeft') },
+      orient: (screen.orientation && screen.orientation.type) || window.orientation, body: [document.body.clientWidth, document.body.clientHeight] };
+    if (seen.ih.indexOf(s.inner[1]) < 0) seen.ih.push(s.inner[1]); if (seen.iw.indexOf(s.inner[0]) < 0) seen.iw.push(s.inner[0]);
+    if (vv && seen.sc.indexOf(s.vv.scale) < 0) seen.sc.push(s.vv.scale);
+    return s;
+  }
+  ruler(); R.size0 = sizes();
+  var relay = function () { ruler(); sizes(); zoomNow(); };
+  window.addEventListener('resize', relay); window.addEventListener('orientationchange', relay);
+  if (vv) { vv.addEventListener('resize', relay); vv.addEventListener('scroll', relay); }
+
+  // ---------- 二、运行环境 ----------
+  var mm = function (q) { try { return matchMedia(q).matches; } catch (e) { return null; } };
+  var sup = function (p, v) { try { return !!(window.CSS && CSS.supports && CSS.supports(p, v)); } catch (e) { return false; } };
+  var nav = navigator, con = nav.connection || nav.mozConnection || nav.webkitConnection;
+  R.env = { ua: nav.userAgent, platform: nav.platform, vendor: nav.vendor, lang: nav.language, langs: (nav.languages || []).join(','), touchPoints: nav.maxTouchPoints,
+    mem: nav.deviceMemory, cores: nav.hardwareConcurrency, online: nav.onLine, standalone: nav.standalone, cookie: nav.cookieEnabled,
+    saveData: con ? con.saveData : null, netType: con ? (con.effectiveType + '/' + con.type) : null, referrer: document.referrer ? 'yes' : 'no',
+    coarse: mm('(pointer: coarse)'), hover: mm('(hover: hover)'), dark: mm('(prefers-color-scheme: dark)'), reduce: mm('(prefers-reduced-motion: reduce)'),
+    forced: mm('(forced-colors: active)'), inverted: mm('(inverted-colors: inverted)'), secure: window.isSecureContext, visible: document.visibilityState };
+  try { localStorage.setItem('_wv7d', '1'); localStorage.removeItem('_wv7d'); R.env.storage = true; } catch (e) { R.env.storage = false; }
+  if (nav.userAgentData && nav.userAgentData.getHighEntropyValues) nav.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'fullVersionList']).then(function (d) {
+    R.env.uach = { model: d.model, os: d.platform + ' ' + d.platformVersion, brands: (d.fullVersionList || d.brands || []).map(function (b) { return b.brand + ' ' + b.version; }).join('; '), mobile: d.mobile }; }).catch(function () {});
+  // 浏览器是否在强行改深色：系统色 Canvas 在“只用浅色”的元素上本该是白色
+  (function () { var d = document.createElement('div'); d.style.cssText = 'color-scheme: light; background-color: Canvas; color: CanvasText; position:fixed; left:-9px; top:-9px; width:1px; height:1px';
+    document.body.appendChild(d); var cs = getComputedStyle(d); R.env.canvasColor = cs.backgroundColor + ' / ' + cs.color; R.env.forceDark = !/255,\s*255,\s*255/.test(cs.backgroundColor); d.remove(); })();
+  R.feat = { cqw: sup('width', '1cqw'), container: sup('container-type', 'size'), dvh: sup('height', '1dvh'), touchAction: sup('touch-action', 'none'), aspect: sup('aspect-ratio', '1'),
+    inset: sup('inset', '0'), mask: sup('mask-image', 'none') || sup('-webkit-mask-image', 'none'), colorScheme: sup('color-scheme', 'dark'), backdrop: sup('backdrop-filter', 'blur(1px)') || sup('-webkit-backdrop-filter', 'blur(1px)'),
+    crypto: !!(window.crypto && crypto.subtle), rvfc: !!(window.HTMLVideoElement && HTMLVideoElement.prototype.requestVideoFrameCallback), mediaCap: !!(nav.mediaCapabilities && nav.mediaCapabilities.decodingInfo),
+    clipboard: !!(nav.clipboard && nav.clipboard.writeText), pointer: !!window.PointerEvent, gesture: 'ongesturestart' in window, vvApi: !!vv, history: !!(history && history.pushState) };
+  (function () { try { var c = document.createElement('canvas'), g = c.getContext('webgl') || c.getContext('experimental-webgl'); R.feat.webgl = !!g;
+    if (g) { var e = g.getExtension('WEBGL_debug_renderer_info'); R.feat.gpu = e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : g.getParameter(g.RENDERER); R.feat.maxTex = g.getParameter(g.MAX_TEXTURE_SIZE); } } catch (e) { R.feat.webgl = false; } })();
+  var imgOK = function (src) { return new Promise(function (r) { var im = new Image(); im.onload = function () { r(im.width > 0); }; im.onerror = function () { r(false); }; im.src = src; }); };
+  imgOK('data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA').then(function (v) { R.feat.webp = v; });
+  if (window.crypto && crypto.subtle) crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']).then(function () { R.feat.aesgcm = true; }).catch(function () { R.feat.aesgcm = false; });
+
+  // ---------- 三、深色模式改不改图 ----------
+  (function () {
+    var c = document.createElement('canvas'); c.width = c.height = 132; var g = c.getContext('2d');
+    g.fillStyle = '#0b1016'; g.fillRect(0, 0, 132, 132); g.fillStyle = '#fff'; g.beginPath(); g.arc(66, 70, 48, 0, 7); g.fill();
+    g.strokeStyle = '#000'; g.lineWidth = 3; g.beginPath(); g.arc(50, 60, 6, 0, 7); g.stroke(); g.beginPath(); g.arc(82, 60, 6, 0, 7); g.stroke(); g.beginPath(); g.arc(66, 76, 20, .3, 2.84); g.stroke();
+    g.beginPath(); g.moveTo(22, 40); g.lineTo(66, 16); g.lineTo(110, 40); g.stroke();
+    var url = c.toDataURL('image/png'), jpg = c.toDataURL('image/jpeg', .9), dk = $('dk');
+    var fig = function (cap, el, cls) { var f = document.createElement('figure'); if (cls) f.className = cls; f.appendChild(el); f.appendChild(document.createTextNode(cap)); dk.appendChild(f); return f; };
+    var im = function (src) { var i = new Image(); i.src = src; i.alt = ''; return i; };
+    fig('1 大图', im(jpg), 'big');
+    fig('2 小图', im(jpg));
+    var w3 = document.createElement('div'); w3.style.colorScheme = 'only light'; w3.appendChild(im(jpg)); fig('3 声明浅色', w3);
+    var w4 = document.createElement('div'); w4.style.colorScheme = 'dark'; w4.appendChild(im(jpg)); fig('4 声明深色', w4);
+    var c5 = document.createElement('canvas'); c5.width = c5.height = 132; c5.getContext('2d').drawImage(c, 0, 0); fig('5 画布', c5);
+    var b6 = document.createElement('div'); b6.className = 'bgi'; b6.style.background = 'url(' + jpg + ') center/cover'; fig('6 背景图', b6);
+    var i7 = im(jpg); i7.style.filter = 'invert(0)'; fig('7 带滤镜', i7);
+    var fr = function (meta) { var f = document.createElement('iframe'); f.setAttribute('scrolling', 'no');
+      f.srcdoc = '<!doctype html><html><head>' + meta + '<style>html,body{margin:0;background:#0e141c;overflow:hidden}img{height:52px;width:52px;vertical-align:top}img+img{width:26px;height:26px;margin:13px}</style></head><body><img src="' + jpg + '"><img src="' + jpg + '"></body></html>'; return f; };
+    fig('8 子页：不声明', fr(''));
+    fig('9 子页：声明 dark', fr('<meta name="color-scheme" content="dark">'));
+    fig('10 子页：only light', fr('<meta name="color-scheme" content="only light">'));
+    fig('11 子页：only dark', fr('<meta name="color-scheme" content="only dark"><style>:root{color-scheme:only dark}</style>'));
+  })();
+  $('p2').poster = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+
+  // ---------- 四、双指放大（可选） ----------
+  var zMax = { zA: 1, zB: 1, zC: 1 }, zIn = null;
+  function zoomNow() { if (!vv) { $('zNow').textContent = '这个浏览器不给放大倍数'; return; }
+    var s = vv.scale; if (zIn && s > zMax[zIn]) zMax[zIn] = s;
+    ['zA', 'zB', 'zC'].forEach(function (k) { $(k + 'v').textContent = '最大 ×' + zMax[k].toFixed(2); $(k + 'v').className = zMax[k] > 1.02 ? 'ng' : ''; });
+    $('zNow').textContent = '整页现在的放大倍数 ×' + s.toFixed(2) + (s > 1.02 ? '（已被放大，双指捏回去）' : ''); }
+  ['zA', 'zB', 'zC'].forEach(function (k) { $(k).addEventListener('touchstart', function () { zIn = k; }, { passive: true }); });
+  var stop = function (e) { e.preventDefault(); };
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (n) { $('zC').addEventListener(n, stop, { passive: false }); });
+  $('zC').addEventListener('touchmove', function (e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  zoomNow(); setInterval(zoomNow, 400);
+
+  // ---------- 五、视频 ----------
+  var mkV = function () { var v = document.createElement('video'); v.muted = true; v.defaultMuted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); return v; };
+  var errOf = function (v) { return v.error ? ('code ' + v.error.code + (v.error.message ? ' ' + v.error.message : '')) : null; };
+  // 发起播放，记下：play() 的答复、多少毫秒后真的在走、有没有放到头、出了几帧
+  async function playTest(v, waitMs) {
+    var t0 = now(), r = { promise: 'pending' }, frames = 0, playingAt = null, endedAt = null, fin;
+    var done = new Promise(function (res) { fin = res; });
+    var onP = function () { if (playingAt === null) playingAt = Math.round(now() - t0); }, onE = function () { endedAt = Math.round(now() - t0); fin(); }, onX = function () { fin(); };
+    v.addEventListener('playing', onP); v.addEventListener('ended', onE); v.addEventListener('error', onX);
+    if (v.requestVideoFrameCallback) { var cb = function () { frames++; if (!v.ended && !v.error) v.requestVideoFrameCallback(cb); }; v.requestVideoFrameCallback(cb); }
+    try { var p = v.play(); if (p && p.then) p.then(function () { r.promise = 'ok'; r.okAt = Math.round(now() - t0); }, function (e) { r.promise = e.name; r.msg = (e.message || '').slice(0, 90); fin(); }); else r.promise = 'no-promise'; }
+    catch (e) { r.promise = 'throw ' + e.name; fin(); }
+    await Promise.race([done, sleep(waitMs)]);
+    await sleep(60);
+    v.removeEventListener('playing', onP); v.removeEventListener('ended', onE); v.removeEventListener('error', onX);
+    var q = v.getVideoPlaybackQuality ? v.getVideoPlaybackQuality() : null;
+    r.playingAt = playingAt; r.endedAt = endedAt; r.t = +v.currentTime.toFixed(2); r.paused = v.paused; r.ready = v.readyState; r.net = v.networkState; r.err = errOf(v);
+    r.size = v.videoWidth + 'x' + v.videoHeight; r.frames = q && q.totalVideoFrames ? q.totalVideoFrames : (frames || null); r.shown = frames || null; r.dropped = q ? q.droppedVideoFrames : null;
+    return r;
+  }
+  var blobs = {}, V = [], dv = {};
+  var policy = {};
+  (async function prep() {
+    try { V = await (await fetch('diag/videos.json', { cache: 'no-cache' })).json(); } catch (e) { R.log.push('取不到视频清单: ' + e.name); $('go').textContent = '取不到测试视频，刷新再试'; return; }
+    for (var i = 0; i < V.length; i++) {
+      $('go').textContent = '准备中 ' + (i + 1) + '/' + V.length + ' LOADING';
+      try { var b = await (await fetch('diag/' + V[i].id + '.mp4', { cache: 'no-cache' })).blob(); blobs[V[i].id] = URL.createObjectURL(new Blob([b], { type: 'video/mp4' })); }
+      catch (e) { R.log.push('取不到 ' + V[i].id + ': ' + e.name); }
+      var f = document.createElement('figure'), v = mkV(); dv[V[i].id] = v; f.appendChild(v); f.appendChild(document.createTextNode(V[i].id.slice(0, 1) + ' ' + V[i].w + 'x' + V[i].h + ' ' + V[i].fps)); $('vids').appendChild(f);
+    }
+    // 没碰屏幕之前：静音视频让不让自己播（正式网页很多地方靠这个）
+    var a = blobs.a_clip;
+    if (a) { var v0 = mkV(); v0.style.cssText = 'position:fixed;left:-200px;top:0;width:160px;height:90px'; document.body.appendChild(v0); v0.src = a;
+      policy.noTouch = lastTouch ? { skipped: '已经碰过屏幕，这一项不准' } : await playTest(v0, 2500); policy.noTouchTouched = !!lastTouch; try { v0.pause(); } catch (e) {} v0.remove(); }
+    for (var k in dv) if (blobs[k]) dv[k].src = blobs[k];
+    await sleep(300);
+    $('go').disabled = false; $('go').textContent = '点这里开始诊断 START';
+  })();
+
+  $('go').addEventListener('click', function () {
+    if ($('go').disabled) return; $('go').disabled = true; tapAt = now(); R.size1 = sizes();
+    // —— 以下几行都在“手指点下去”的那一刻里执行 ——
+    var g1 = mkV(), u1 = mkV(), u2 = mkV(), late = mkV();
+    [g1, u1, u2, late].forEach(function (v, i) { v.style.cssText = 'position:fixed;left:-200px;top:' + (i * 95) + 'px;width:160px;height:90px'; document.body.appendChild(v); });
+    g1.src = blobs.a_clip;
+    var pG = playTest(g1, 3000);                                   // 点按当下、已经装好视频：播
+    var uState = {};
+    [u1, u2].forEach(function (v) { try { var p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} });   // 正式网页的“先解锁”：空播放器先调一次播放
+    uState.afterUnlock = [u1.paused, u2.paused];
+    // 测解码的八个播放器：点按当下各调一次播放再停，之后由程序发起的播放就不该被拦
+    for (var k in dv) { try { var p2 = dv[k].play(); if (p2 && p2.catch) p2.catch(function () {}); dv[k].pause(); } catch (e) {} }
+    run(pG, g1, u1, u2, late, uState).catch(function (e) { R.log.push('流程出错: ' + e.name + ' ' + e.message); finish(); });
+  });
+
+  async function run(pG, g1, u1, u2, late, uState) {
+    var say = function (s) { $('go').textContent = s; };
+    say('测试中 0/' + V.length + '（别碰屏幕）');
+    policy.inTap = await pG; try { g1.pause(); } catch (e) {} g1.remove();
+    // 逐支测解码
+    R.video = {};
+    for (var i = 0; i < V.length; i++) {
+      var s = V[i], v = dv[s.id], r = { spec: s.w + 'x' + s.h + '@' + s.fps + ' L' + s.level + ' ref' + s.ref };
+      say('测试中 ' + (i + 1) + '/' + V.length + '（别碰屏幕）');
+      r.canPlay = v.canPlayType('video/mp4; codecs="' + s.codec + '"') || 'no';
+      if (R.feat.mediaCap) { try { var d = await navigator.mediaCapabilities.decodingInfo({ type: 'file', video: { contentType: 'video/mp4; codecs="' + s.codec + '"', width: s.w, height: s.h, bitrate: s.bitrate, framerate: s.fps } });
+        r.cap = (d.supported ? 'S' : 's') + (d.smooth ? 'M' : 'm') + (d.powerEfficient ? 'P' : 'p'); } catch (e) { r.cap = 'err ' + e.name; } }
+      if (!blobs[s.id]) { r.play = { promise: '没下载到' }; R.video[s.id] = r; continue; }
+      try { v.currentTime = 0; } catch (e) {}
+      r.play = await playTest(v, s.dur * 1000 + 4500);
+      try { v.pause(); } catch (e) {}
+      R.video[s.id] = r; await sleep(250);
+    }
+    // 点按过去 6 秒以上再测“程序自己发起的播放”
+    var wait = 6200 - (now() - tapAt); if (wait > 0) { say('再等几秒（别碰屏幕）'); await sleep(wait); }
+    policy.touchedDuring = lastTouch > tapAt + 400;
+    late.src = blobs.a_clip; policy.lateFresh = await playTest(late, 3000); try { late.pause(); } catch (e) {} late.remove();
+    // 正式网页现在的流程：解锁过的空播放器 → 装视频 → load() → play()
+    uState.beforeSrc = [u1.paused, u2.paused];
+    u1.src = blobs.a_clip; uState.u1AfterSrc = u1.paused; u1.load(); uState.u1AfterLoad = u1.paused;
+    policy.siteFlow = await playTest(u1, 3000); try { u1.pause(); } catch (e) {} u1.remove();
+    // 同样解锁过，但只装视频、不调 load() 也不调 play()：看它会不会自己播
+    u2.src = blobs.a_clip; var t0 = now(); while (now() - t0 < 2500 && !(u2.currentTime > 0.05)) await sleep(60);
+    policy.srcOnly = { started: u2.currentTime > 0.05, t: +u2.currentTime.toFixed(2), paused: u2.paused, err: errOf(u2) }; try { u2.pause(); } catch (e) {} u2.remove();
+    policy.unlock = uState;
+    finish();
+  }
+
+  function finish() {
+    R.policy = policy; R.size2 = sizes(); R.seen = seen; R.zoomMax = zMax;
+    var mark = function (ok, warn) { return ok ? '✓' : (warn ? '△' : '✗'); };
+    var pol = function (p) { if (!p) return '没测'; if (p.skipped) return p.skipped; if (p.playingAt !== null && p.playingAt !== undefined && p.t > 0.05) return '✓ 能播(' + p.playingAt + 'ms)';
+      return '✗ ' + p.promise + (p.err ? ' ' + p.err : '') + (p.paused ? ' 停着' : ' 没停但不走'); };
+    var s = R.size2, L = [];
+    L.push(VER + '  ' + R.time.slice(0, 16));
+    L.push('窗口 ' + s.inner.join('×') + '｜整页 ' + s.client.join('×') + '｜可见 ' + (s.vv ? s.vv.w + '×' + s.vv.h + ' ×' + s.vv.scale : '?') + '｜屏 ' + s.screen.join('×') + ' @' + s.dpr);
+    L.push('单位 vh' + s.units.vh + ' svh' + s.units.svh + ' lvh' + s.units.lvh + ' dvh' + s.units.dvh + ' 100%' + s.units.pct + '｜留边 上' + s.safe.top + ' 右' + s.safe.right + ' 下' + s.safe.bottom + ' 左' + s.safe.left);
+    L.push('窗口高出现过 ' + seen.ih.join('/') + '｜放大倍数出现过 ' + (seen.sc.join('/') || '?'));
+    L.push('自动播放：没碰屏幕 ' + pol(policy.noTouch));
+    L.push('　点按当下 ' + pol(policy.inTap) + '｜6 秒后新播放器 ' + pol(policy.lateFresh));
+    L.push('　网站现用流程 ' + pol(policy.siteFlow) + '（解锁后停着=' + (policy.unlock ? policy.unlock.afterUnlock[0] + '→装视频' + policy.unlock.u1AfterSrc + '→load ' + policy.unlock.u1AfterLoad : '?') + '）｜只装不播 ' + (policy.srcOnly ? (policy.srcOnly.started ? '✓ 自己播了' : '✗ 没动') : '?'));
+    if (policy.touchedDuring) L.push('　注意：测试期间碰过屏幕，上面“6 秒后”几项不准');
+    var vl = [];
+    V.forEach(function (sp) { var r = R.video && R.video[sp.id]; if (!r) { vl.push(sp.id.slice(0, 1) + ' 没测'); return; } var p = r.play, full = p.endedAt !== null && p.endedAt !== undefined;
+      var slow = full && (p.endedAt - (p.playingAt || 0)) > sp.dur * 1000 * 1.35;
+      vl.push(sp.id.slice(0, 1) + ' ' + sp.w + 'x' + sp.h + '@' + sp.fps + ' L' + sp.level.toFixed(1) + ' ' + (full ? mark(!slow, true) : '✗') + ' ' + (full ? ('起播' + p.playingAt + ' 放完' + p.endedAt + ' ' + (p.frames || '?') + '帧' + (p.dropped ? ' 丢' + p.dropped : '')) : (p.promise + (p.err ? ' ' + p.err : '') + ' 走到' + p.t + 's')) + ' [' + (r.cap || '-') + ']'); });
+    L.push('视频（毫秒；应放完约 1500）：'); vl.forEach(function (x) { L.push('　' + x); });
+    L.push('深色：系统深色 ' + R.env.dark + '｜浏览器强改 ' + R.env.forceDark + '（' + R.env.canvasColor + '）');
+    L.push('功能：cqw ' + mark(R.feat.cqw) + ' dvh ' + mark(R.feat.dvh) + ' 触摸声明 ' + mark(R.feat.touchAction) + ' WebP ' + mark(R.feat.webp) + ' WebGL ' + mark(R.feat.webgl) + ' 解密 ' + mark(R.feat.aesgcm) + ' 省流量 ' + R.env.saveData + ' 触屏 ' + R.env.coarse);
+    L.push('UA ' + R.env.ua);
+    if (R.env.uach) L.push('机型 ' + R.env.uach.model + '｜' + R.env.uach.os + '｜' + R.env.uach.brands);
+    if (R.log.length) L.push('日志 ' + R.log.join(' ; '));
+    $('sum').textContent = L.join('\n');
+    var full = L.join('\n') + '\n\n----- 原始数据 -----\n' + JSON.stringify(R);
+    $('out').value = full; $('copy').style.display = ''; $('go').textContent = '跑完了：截这一屏，再点“复制结果”'; $('go').style.cssText = 'padding:5px 8px;font-size:12px;margin:3px 0'; $('tip').style.display = 'none'; R.done = true; window.__diag = R;
+  }
+  $('copy').addEventListener('click', function () {
+    var t = $('out'), ok = function () { $('copied').textContent = ' 已复制，粘贴发给作者'; }, old = function () { try { t.removeAttribute('readonly'); t.focus(); t.select(); t.setSelectionRange(0, t.value.length); var r = document.execCommand('copy'); t.setAttribute('readonly', ''); if (r) ok(); else $('copied').textContent = ' 复制不了：长按下面的文本框全选复制'; } catch (e) { $('copied').textContent = ' 复制不了：长按下面的文本框全选复制'; } };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t.value).then(ok, old); else old();
+  });
+  window.__diag = R;
+})();
+</script>
+</body>
+</html>
