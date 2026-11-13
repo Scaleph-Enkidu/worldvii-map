@@ -51,11 +51,12 @@
 <div id="frame100"></div>
 <div id="frame"></div>
 <div id="wrap"><div id="in">
-  <h1>世界Ⅶ 诊断页 <small>DIAG v1</small></h1>
+  <h1>世界Ⅶ 诊断页 <small>DIAG v2</small></h1>
   <p id="tip"><small>青色实线框和四边的标尺＝正式网页会用的画面大小；橙色虚线框＝浏览器说的“整页”。<b>先别滚动，点下面的按钮，等它跑完（约 30 秒，期间别碰屏幕），截第一屏；再点“复制结果”发给作者。</b></small></p>
   <button id="go" disabled>准备中… LOADING</button>
+  <button id="copy" style="display:none">复制结果 COPY</button><small id="cnt"></small><span id="copied"></span>
   <pre id="sum">还没开始</pre>
-  <button id="copy" style="display:none">复制结果 COPY</button><span id="copied"></span>
+  <textarea id="short" readonly style="display:none;height:96px"></textarea>
   <h2>测试视频（彩条）</h2>
   <div id="vids"></div>
   <h2>深色模式会不会改图（原图：暗底上一个白色圆脸，黑色线条）</h2>
@@ -66,13 +67,13 @@
   <h2>可选：双指放大测试（在每个框里各捏一下，看整页会不会被放大）</h2>
   <div class="zb"><div id="zA">甲：声明触摸归网页<br><b id="zAv">—</b></div><div id="zB">乙：什么都不设<br><b id="zBv">—</b></div><div id="zC">丙：脚本拦截<br><b id="zCv">—</b></div></div>
   <p id="zNow"></p>
-  <h2>完整结果</h2>
+  <h2>完整数据（很长，一般不用发；需要时长按全选复制）</h2>
   <textarea id="out" readonly></textarea>
 </div></div>
 <script>
 (function () {
   'use strict';
-  var VER = 'DIAG v1';
+  var VER = 'DIAG v2';
   var $ = function (id) { return document.getElementById(id); };
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var now = function () { return performance.now(); };
@@ -111,9 +112,11 @@
     return s;
   }
   ruler(); R.size0 = sizes();
-  var relay = function () { ruler(); sizes(); zoomNow(); };
+  var evn = { win: 0, vv: 0 };
+  var relay = function () { evn.win++; ruler(); sizes(); zoomNow(); };
   window.addEventListener('resize', relay); window.addEventListener('orientationchange', relay);
-  if (vv) { vv.addEventListener('resize', relay); vv.addEventListener('scroll', relay); }
+  if (vv) { vv.addEventListener('resize', function () { evn.vv++; sizes(); zoomNow(); }); vv.addEventListener('scroll', function () { sizes(); zoomNow(); }); }
+  setInterval(sizes, 500);
 
   // ---------- 二、运行环境 ----------
   var mm = function (q) { try { return matchMedia(q).matches; } catch (e) { return null; } };
@@ -274,7 +277,9 @@
     L.push(VER + '  ' + R.time.slice(0, 16));
     L.push('窗口 ' + s.inner.join('×') + '｜整页 ' + s.client.join('×') + '｜可见 ' + (s.vv ? s.vv.w + '×' + s.vv.h + ' ×' + s.vv.scale : '?') + '｜屏 ' + s.screen.join('×') + ' @' + s.dpr);
     L.push('单位 vh' + s.units.vh + ' svh' + s.units.svh + ' lvh' + s.units.lvh + ' dvh' + s.units.dvh + ' 100%' + s.units.pct + '｜留边 上' + s.safe.top + ' 右' + s.safe.right + ' 下' + s.safe.bottom + ' 左' + s.safe.left);
-    L.push('窗口高出现过 ' + seen.ih.join('/') + '｜放大倍数出现过 ' + (seen.sc.join('/') || '?'));
+    if (R.size0.inner.join() !== s.inner.join() || R.size0.client.join() !== s.client.join()) L.push('刚打开时 窗口 ' + R.size0.inner.join('×') + '｜整页 ' + R.size0.client.join('×') + '（和现在不一样）');
+    L.push('窗口高出现过 ' + seen.ih.join('/') + '｜放大倍数出现过 ' + (seen.sc.join('/') || '?') + '｜“大小变了”的通知 ' + evn.win + ' 次');
+    R.events = evn;
     L.push('自动播放：没碰屏幕 ' + pol(policy.noTouch));
     L.push('　点按当下 ' + pol(policy.inTap) + '｜6 秒后新播放器 ' + pol(policy.lateFresh));
     L.push('　网站现用流程 ' + pol(policy.siteFlow) + '（解锁后停着=' + (policy.unlock ? policy.unlock.afterUnlock[0] + '→装视频' + policy.unlock.u1AfterSrc + '→load ' + policy.unlock.u1AfterLoad : '?') + '）｜只装不播 ' + (policy.srcOnly ? (policy.srcOnly.started ? '✓ 自己播了' : '✗ 没动') : '?'));
@@ -291,10 +296,37 @@
     if (R.log.length) L.push('日志 ' + R.log.join(' ; '));
     $('sum').textContent = L.join('\n');
     var full = L.join('\n') + '\n\n----- 原始数据 -----\n' + JSON.stringify(R);
-    $('out').value = full; $('copy').style.display = ''; $('go').textContent = '跑完了：截这一屏，再点“复制结果”'; $('go').style.cssText = 'padding:5px 8px;font-size:12px;margin:3px 0'; $('tip').style.display = 'none'; R.done = true; window.__diag = R;
+    shortCode();
+    $('out').value = full; $('copy').style.display = ''; $('go').textContent = '跑完了：截这一屏，再点“复制结果”（短码，一条消息能发完）'; $('go').style.cssText = 'padding:5px 8px;font-size:12px;margin:3px 0'; $('tip').style.display = 'none'; R.done = true; window.__diag = R;
+  }
+  // 短码：几百个字，聊天软件一条能发完（“>”左边是刚打开时的数，右边是跑完时的数）
+  function shortCode() {
+    var s0 = R.size0, sN = R.size2 || sizes(), p = policy, S = [];
+    var x2 = function (a) { return a ? a[0] + 'x' + a[1] : '?'; }, ch = function (a, b) { return a === b ? a : a + '>' + b; };
+    var vvs = function (z) { return z.vv ? z.vv.w + 'x' + z.vv.h + '*' + z.vv.scale : '?'; }, b = function (v) { return v === true ? 1 : v === false ? 0 : '?'; }, n0 = function (v) { return parseFloat(v) || 0; };
+    var en = function (n) { return ({ NotAllowedError: 'NA', NotSupportedError: 'NS', AbortError: 'AB', pending: 'PD', ok: 'OK' })[n] || String(n).slice(0, 12); };
+    var sp = function (q) { if (!q) return '?'; if (q.skipped) return '-'; if (q.playingAt !== null && q.playingAt !== undefined && q.t > 0.05) return '✓' + q.playingAt;
+      return '✗' + en(q.promise) + (q.paused ? 'P' : 'R') + (q.err ? '(' + q.err.slice(0, 30) + ')' : ''); };
+    var u0 = s0.units, u = sN.units, sf = sN.safe;
+    S.push('WV7诊断2 ' + R.time.slice(5, 16));
+    S.push('窗' + ch(x2(s0.inner), x2(sN.inner)) + ' 页' + ch(x2(s0.client), x2(sN.client)) + ' 见' + ch(vvs(s0), vvs(sN)) + ' 屏' + x2(sN.screen) + '@' + sN.dpr);
+    S.push('vh' + ch(u0.vh, u.vh) + ' s' + ch(u0.svh, u.svh) + ' l' + ch(u0.lvh, u.lvh) + ' d' + ch(u0.dvh, u.dvh) + ' %' + ch(u0.pct, u.pct) + ' 边' + [n0(sf.top), n0(sf.right), n0(sf.bottom), n0(sf.left)].join(',') +
+      ' 高' + seen.ih.join('/') + ' 宽' + seen.iw.join('/') + ' 倍' + (seen.sc.join('/') || '?') + ' 事件' + evn.win + '/' + evn.vv);
+    S.push('播 未' + sp(p.noTouch) + ' 点' + sp(p.inTap) + ' 后' + sp(p.lateFresh) + ' 现' + sp(p.siteFlow) + (p.unlock ? '[' + b(p.unlock.afterUnlock[0]) + b(p.unlock.u1AfterSrc) + b(p.unlock.u1AfterLoad) + ']' : '') +
+      ' 装' + (p.srcOnly ? (p.srcOnly.started ? '✓' : '✗') : '?') + (p.touchedDuring ? ' 碰过' : ''));
+    var vs = V.map(function (v) { var r = R.video && R.video[v.id]; if (!r) return v.id.slice(0, 1) + '?'; var q = r.play, full = q.endedAt !== null && q.endedAt !== undefined, slow = full && (q.endedAt - (q.playingAt || 0)) > v.dur * 1000 * 1.35;
+      return v.id.slice(0, 1) + (full ? (slow ? '△' : '✓') + q.playingAt + '/' + q.endedAt + (q.dropped ? '-' + q.dropped : '') : '✗' + en(q.promise) + '@' + q.t + (q.err ? '(' + q.err.slice(0, 40) + ')' : '')) + (r.cap && r.cap !== 'SMP' ? '[' + r.cap + ']' : ''); });
+    S.push('片 ' + vs.join(' '));
+    S.push('暗 系' + b(R.env.dark) + ' 强' + b(R.env.forceDark) + (R.env.forceDark ? '(' + R.env.canvasColor.split(' / ')[0].replace(/[^\d,]/g, '') + ')' : '') + ' cqw' + b(R.feat.cqw) + ' dvh' + b(R.feat.dvh) + ' 触' + b(R.feat.touchAction) +
+      ' webp' + b(R.feat.webp) + ' gl' + b(R.feat.webgl) + ' 密' + b(R.feat.aesgcm) + ' 省' + b(R.env.saveData) + ' 屏' + b(R.env.coarse) + ' 捏' + [zMax.zA, zMax.zB, zMax.zC].map(function (z) { return z.toFixed(2); }).join('/'));
+    var ua = R.env.ua || '', m = ua.match(/\(([^)]*)\)/), tail = ua.split('Gecko) ')[1] || '', h = R.env.uach;
+    S.push('UA ' + (m ? m[1] : ua.slice(0, 60)) + ' | ' + tail.replace(/ ?Mobile Safari\/[\d.]+/, '').replace(/ ?Safari\/[\d.]+/, '') + (h && /WebView/.test(h.brands) ? ' | WV' : '') + (h && h.model ? ' | ' + h.model : ''));
+    if (R.log.length) S.push('志 ' + R.log.join(';').slice(0, 140));
+    var t = S.join('\n'); $('short').value = t; $('short').style.display = ''; $('cnt').textContent = '（' + t.length + ' 字）'; return t;
   }
   $('copy').addEventListener('click', function () {
-    var t = $('out'), ok = function () { $('copied').textContent = ' 已复制，粘贴发给作者'; }, old = function () { try { t.removeAttribute('readonly'); t.focus(); t.select(); t.setSelectionRange(0, t.value.length); var r = document.execCommand('copy'); t.setAttribute('readonly', ''); if (r) ok(); else $('copied').textContent = ' 复制不了：长按下面的文本框全选复制'; } catch (e) { $('copied').textContent = ' 复制不了：长按下面的文本框全选复制'; } };
+    shortCode();
+    var t = $('short'), ok = function () { $('copied').textContent = ' 已复制，粘贴发给作者'; }, old = function () { try { t.removeAttribute('readonly'); t.focus(); t.select(); t.setSelectionRange(0, t.value.length); var r = document.execCommand('copy'); t.setAttribute('readonly', ''); if (r) ok(); else $('copied').textContent = ' 复制不了：长按下面的小文本框全选复制'; } catch (e) { $('copied').textContent = ' 复制不了：长按下面的小文本框全选复制'; } };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t.value).then(ok, old); else old();
   });
   window.__diag = R;
