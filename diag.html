@@ -110,7 +110,7 @@
   <button class="main" id="ntok" data-i="nt_ok"></button>
 </div></div>
 <div id="wrap"><div id="in">
-  <div class="hd"><b data-i="hd"></b><small>DIAG v10</small><span id="stepno"></span></div>
+  <div class="hd"><b data-i="hd"></b><small>DIAG v11</small><span id="stepno"></span></div>
 
   <section class="step on" id="sL">
     <h1>言語を選んでください<br>请选择语言</h1>
@@ -214,7 +214,7 @@
 <script>
 (function () {
   'use strict';
-  var VER = 'DIAG v10';
+  var VER = 'DIAG v11';
   var UP = 'https://ntfy.sh/wv7d-f431e2a8ce16cadf75';          // 免账号的中转频道：只发诊断数字，不含作品内容
   var RID = (function () { var a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = ''; for (var i = 0; i < 4; i++) r += a.charAt(Math.floor(Math.random() * a.length)); return r; })();
   function send(text, ms) { var c = window.AbortController ? new AbortController() : null, t = setTimeout(function () { if (c) c.abort(); }, ms || 15000);
@@ -266,7 +266,12 @@
   function px(css, prop) { var d = document.createElement('div'); d.style.cssText = 'position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;' + css; document.body.appendChild(d);
     var v = prop ? getComputedStyle(d)[prop] : d.getBoundingClientRect().height; d.remove(); return typeof v === 'number' ? Math.round(v * 100) / 100 : v; }
   var seen = { ih: [], iw: [], sc: [] };
+  var tl = [], tlKey = '';
+  function tlTick() { var a = [window.innerHeight, document.documentElement.clientHeight, vv ? Math.round(vv.height) : '?'], k = a.join(',');
+    if (k === tlKey || tl.length >= 8 || (vv && Math.abs(vv.scale - 1) > 0.02)) return; tlKey = k;
+    tl.push(k + '@' + Math.round(now()) + (evn ? '(' + evn.win + '/' + evn.vv + ')' : '')); }
   function sizes() {
+    tlTick();
     var de = document.documentElement, s = {
       inner: [window.innerWidth, window.innerHeight], outer: [window.outerWidth, window.outerHeight], client: [de.clientWidth, de.clientHeight],
       screen: [screen.width, screen.height], avail: [screen.availWidth, screen.availHeight], dpr: Math.round(window.devicePixelRatio * 100) / 100,
@@ -279,7 +284,8 @@
     if (vv && seen.sc.indexOf(s.vv.scale) < 0) seen.sc.push(s.vv.scale);
     return s;
   }
-  ruler(); R.size0 = sizes();
+  ruler(); R.size0 = sizes(); R.tl = tl;
+  var tlFast = setInterval(function () { tlTick(); if (now() > 12000) clearInterval(tlFast); }, 100);
   var evn = { win: 0, vv: 0 };
   var relay = function () { evn.win++; ruler(); sizes(); zoomNow(); };
   window.addEventListener('resize', relay); window.addEventListener('orientationchange', relay);
@@ -484,6 +490,7 @@
     if (R.size0.inner.join() !== s.inner.join() || R.size0.client.join() !== s.client.join()) L.push('刚打开时 窗口 ' + R.size0.inner.join('×') + '｜整页 ' + R.size0.client.join('×') + '（和现在不一样）');
     L.push('窗口高出现过 ' + seen.ih.join('/') + '｜放大倍数出现过 ' + (seen.sc.join('/') || '?') + '｜“大小变了”的通知 ' + evn.win + ' 次');
     R.events = evn;
+    L.push('高度变化（窗口高,整页高,可见区高@开页后毫秒(那时已来的窗口通知/可见区通知)）：' + tl.join(' > '));
     L.push('自动播放：没碰屏幕 ' + pol(policy.noTouch));
     L.push('　点按当下 ' + pol(policy.inTap) + '｜6 秒后新播放器 ' + pol(policy.lateFresh));
     L.push('　网站现用流程 ' + pol(policy.siteFlow) + '（解锁后停着=' + (policy.unlock ? policy.unlock.afterUnlock[0] + '→装视频' + policy.unlock.u1AfterSrc + '→load ' + policy.unlock.u1AfterLoad : '?') + '）｜只装不播 ' + (policy.srcOnly ? (policy.srcOnly.started ? '✓ 自己播了' : '✗ 没动') : '?'));
@@ -520,10 +527,11 @@
     var sp = function (q) { if (!q) return '?'; if (q.skipped) return '-'; if (q.playingAt !== null && q.playingAt !== undefined && q.t > 0.05) return '✓' + q.playingAt;
       return '✗' + en(q.promise) + (q.paused ? 'P' : 'R') + (q.err ? '(' + q.err.slice(0, 30) + ')' : ''); };
     var u0 = s0.units, u = sN.units, sf = sN.safe;
-    S.push('WV7诊断10 #' + RID + ' ' + R.time.slice(5, 16));
+    S.push('WV7诊断11 #' + RID + ' ' + R.time.slice(5, 16));
     S.push('窗' + ch(x2(s0.inner), x2(sN.inner)) + ' 页' + ch(x2(s0.client), x2(sN.client)) + ' 见' + ch(vvs(s0), vvs(sN)) + ' 屏' + x2(sN.screen) + '@' + sN.dpr);
     S.push('vh' + ch(u0.vh, u.vh) + ' s' + ch(u0.svh, u.svh) + ' l' + ch(u0.lvh, u.lvh) + ' d' + ch(u0.dvh, u.dvh) + ' %' + ch(u0.pct, u.pct) + ' 边' + [n0(sf.top), n0(sf.right), n0(sf.bottom), n0(sf.left)].join(',') +
       ' 高' + seen.ih.join('/') + ' 宽' + seen.iw.join('/') + ' 倍' + (seen.sc.join('/') || '?') + ' 事件' + evn.win + '/' + evn.vv);
+    S.push('变 ' + tl.join(' > '));
     S.push('播 未' + sp(p.noTouch) + ' 点' + sp(p.inTap) + ' 后' + sp(p.lateFresh) + ' 现' + sp(p.siteFlow) + (p.unlock ? '[' + b(p.unlock.afterUnlock[0]) + b(p.unlock.u1AfterSrc) + b(p.unlock.u1AfterLoad) + ']' : '') +
       ' 装' + (p.srcOnly ? (p.srcOnly.started ? '✓' : '✗') : '?') + (p.touchedDuring ? ' 碰过' : ''));
     var vs = V.map(function (v) { var r = R.video && R.video[v.id]; if (!r) return v.id.slice(0, 1) + '?'; var q = r.play, full = q.endedAt !== null && q.endedAt !== undefined, slow = full && (q.endedAt - (q.playingAt || 0)) > v.dur * 1000 * 1.35;
