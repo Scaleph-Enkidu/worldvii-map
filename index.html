@@ -572,16 +572,68 @@ html[lang="ko"] { --f-jp: "Noto Sans JP Sub", "Apple SD Gothic Neo", "Malgun Got
   background: linear-gradient(to right, rgba(5, 9, 14, 0) 0%, rgba(5, 9, 14, 0.035) 12%, rgba(5, 9, 14, 0.12) 24%, rgba(5, 9, 14, 0.3) 36%, rgba(5, 9, 14, 0.5) 45%, rgba(5, 9, 14, 0.6) 50%, rgba(5, 9, 14, 0.5) 55%, rgba(5, 9, 14, 0.3) 64%, rgba(5, 9, 14, 0.12) 76%, rgba(5, 9, 14, 0.035) 88%, rgba(5, 9, 14, 0) 100%);
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.35) 22%, #000 42%, #000 58%, rgba(0,0,0,.35) 78%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.35) 22%, #000 42%, #000 58%, rgba(0,0,0,.35) 78%, transparent 100%); }
 .relief #yr::before { background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.035) 12%, rgba(255, 255, 255, 0.12) 24%, rgba(255, 255, 255, 0.3) 36%, rgba(255, 255, 255, 0.5) 45%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.5) 55%, rgba(255, 255, 255, 0.3) 64%, rgba(255, 255, 255, 0.12) 76%, rgba(255, 255, 255, 0.035) 88%, rgba(255, 255, 255, 0) 100%); }
+/* ---- 第 36 版：安全区は「突き抜け」。地図・暗幕・パネルの地は画面の端まで。端にある釦と文字だけが安全区のぶん内側へ ---- */
+:root { --iT: 0px; --iR: 0px; --iB: 0px; --iL: 0px; }
+#title { left: calc(14px + var(--iL)); top: calc(12px + var(--iT)); }
+#top { top: calc(10px + var(--iT)); }
+.tightT #top { left: calc(14px + var(--iL)); }
+#fsRow { right: calc(14px + var(--iR)); top: calc(10px + var(--iT)); }
+#langMenu { right: calc(14px + var(--iR)); }
+#back, #corpx { left: calc(14px + var(--iL)); top: calc(12px + var(--iT)); }
+#infoBtn { top: calc(12px + var(--iT)); }
+#bottom { bottom: calc(12px + var(--iB)); }
+.tightB #bottom { left: calc(14px + var(--iL)); }
+#vx { left: calc(14px + var(--iL)); bottom: calc(14px + var(--iB)); }
+.tightB #vx { bottom: calc(var(--vxb, 14px) + var(--iB)); }
+.flyend #vx { bottom: calc(14px + var(--iB)) !important; }
+#moreBtn { right: calc(14px + var(--iR)); bottom: calc(12px + var(--iB)); }
+#fsSeg2 { left: calc(14px + var(--iL)); bottom: calc(14px + var(--iB)); }
+.flyend.fly-eden #fsSeg2 { bottom: calc(22px + 14px * var(--fb) + var(--iB)); }
+.segR #fsSeg2 { left: auto; right: calc(14px + var(--iR)); bottom: calc(14px + var(--iB)) !important; }
+#intro { top: calc(9% + var(--iT)); }
+#intro.right { right: calc(2.8% + var(--iR)); }
+#intro.left { left: calc(2.8% + var(--iL)); top: calc(max(9%, 24px + 40px * var(--fb)) + var(--iT)); }
+#wait { bottom: calc(17% + var(--iB)); }
+/* 右のパネル：地は端まで、中身だけ避ける。全画面のページでは左の細い帯も避ける */
+#sideMenu { right: var(--iR); }
+#sidePage { right: var(--iR); top: var(--iT); bottom: var(--iB); }
+#fsSeg3 { bottom: calc(12px + var(--iB)); }
+.side-full #sideBack { left: var(--iL); }
+.side-full #sidePage { left: calc(46px + var(--iL)); }
+.side-full #fsSeg3 { left: calc(3px + var(--iL)); }
+.ins.flying body, .ins.flyend body { background: inherit; }
+/* ---- 第 37 版：全画面のボタン（ブラウザが「できる」と言うときだけ出す） ---- */
+#fsBtn { display: none; appearance: none; -webkit-appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 4px; padding: 0 calc(11px * var(--fb));
+  align-items: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: opacity .3s; }
+#fsBtn.can { display: flex; }
+#fsBtn svg { width: calc(22px * var(--fb)); height: calc(22px * var(--fb)); display: block; }
+#fsBtn .fb, .isFs #fsBtn .fa { display: none; }
+.isFs #fsBtn .fb { display: inline; }
+.uiOff #fsBtn { opacity: 0 !important; pointer-events: none !important; }
+/* ---- 第 38 版：全画面の釦は列のいちばん左（列は右寄せなので、この釦が有っても無くても他の釦の位置は同じ） ---- */
+#fsBtn { order: -1; }
+/* ---- 第 40 版：登場人物の小さい顔の列。四つだけ見せ、五つ目は半分だけ淡く。横に動かして続きを見る ---- */
+.chr .strip { --thw: max(52px, 7cqw); --gp: max(7px, 1cqw); --cL: #000; --cR: #000; right: auto; box-sizing: content-box;
+  width: calc(var(--thw) * 4.55 + var(--gp) * 4); max-width: calc(100% - var(--picw, 43%) - 6cqw - 20px); padding: 10px; margin: 0 0 -10px -10px; gap: var(--gp);
+  overflow: hidden; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none;
+  -webkit-mask-image: linear-gradient(to right, var(--cL) 0, #000 26px, #000 calc(100% - var(--thw) * .55 - 10px), var(--cR) calc(100% - 6px));
+  mask-image: linear-gradient(to right, var(--cL) 0, #000 26px, #000 calc(100% - var(--thw) * .55 - 10px), var(--cR) calc(100% - 6px)); }
+.chr .strip.ml { --cL: transparent; }
+.chr .strip.mr { --cR: transparent; }
+.chr .th { width: var(--thw); cursor: pointer; }
+/* 鼠标按住往上拖着滑文字时，不要把字选成蓝的（验证截图里看到的；手指拖不会这样） */
+.vs.scroll { user-select: none; -webkit-user-select: none; cursor: grab; }
+/* ---- 第 41 版：小さい顔の列は絵の右から頁の右端まで。顔の大きさは使える幅から決める（ふだんは五つ＋六つ目が半分） ---- */
+.chr .strip { right: calc(5cqw - 10px); width: auto; max-width: none; }
 </style>
 </head>
 <body>
-<div id="stage">
+<div id="stage" class="tightT tightB">
 <div id="map"></div>
 <div id="top" class="seg" role="tablist" aria-label="Map">
   <button data-k="map" data-v="pre">戦前<small>PRE-WAR</small></button>
   <button data-k="map" data-v="post">戦後<small>POST-WAR</small></button>
 </div>
-<div id="title">世界Ⅶ / WORLD VII</div>
 <div id="vx">VERTICAL SCALE ×8</div>
 <div id="yr"><div class="n"><span class="d">2</span><span class="d">0</span><span class="d">6</span><span class="d">9</span></div><div class="r"></div><div class="c">YEAR</div></div>
 <div id="bottom">
@@ -597,7 +649,7 @@ html[lang="ko"] { --f-jp: "Noto Sans JP Sub", "Apple SD Gothic Neo", "Malgun Got
     <button data-k="labels" data-v="1">地名<small>LABELS</small></button>
   </div>
 </div>
-<div id="fsRow"><div class="fsSeg" role="group" aria-label="Text size"><button data-fs="0">A</button><button data-fs="1">A</button><button data-fs="2">A</button></div><button id="langBtn" aria-haspopup="true"><span></span><small>LANGUAGE</small></button><button id="uiEye" aria-label="Hide buttons"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true"><path d="M2.5 12c2.4-4 5.6-6 9.5-6s7.1 2 9.5 6c-2.4 4-5.6 6-9.5 6s-7.1-2-9.5-6z"/><circle cx="12" cy="12" r="2.9"/><path class="sl" d="M4.5 4.5l15 15"/></svg></button></div>
+<div id="fsRow"><div class="fsSeg" role="group" aria-label="Text size"><button data-fs="0">A</button><button data-fs="1">A</button><button data-fs="2">A</button></div><button id="langBtn" aria-haspopup="true"><span></span><small>LANGUAGE</small></button><button id="uiEye" aria-label="Hide buttons"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true"><path d="M2.5 12c2.4-4 5.6-6 9.5-6s7.1 2 9.5 6c-2.4 4-5.6 6-9.5 6s-7.1-2-9.5-6z"/><circle cx="12" cy="12" r="2.9"/><path class="sl" d="M4.5 4.5l15 15"/></svg></button><button id="fsBtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="fa" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="fb" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg></button></div>
 <div id="langMenu" role="menu"></div>
 <div id="fsSeg2" class="fsSeg" role="group" aria-label="Text size"><button data-fs="0">A</button><button data-fs="1">A</button><button data-fs="2">A</button></div>
 <div id="scrim"></div>
@@ -689,15 +741,16 @@ const MSGK = { 'QRコードから開いてください': 'err.noqr', 'QRコー�
   document.body.appendChild(insEl);
   const insets = () => { if (window.__wv7insTest) return window.__wv7insTest; const c = getComputedStyle(insEl); return [c.paddingTop, c.paddingRight, c.paddingBottom, c.paddingLeft].map((x) => Math.max(0, Math.round(parseFloat(x) || 0))); };
   let _li = '';
+  const setIns = (T, R, B, L) => { const q = document.documentElement.style; q.setProperty('--iT', T + 'px'); q.setProperty('--iR', R + 'px'); q.setProperty('--iB', B + 'px'); q.setProperty('--iL', L + 'px'); };          // 舞台から見た上・右・下・左の安全区
   function layout() {
     const w = VW(), h = VH(), I = insets(), t = I[0], r = I[1], b = I[2], l = I[3]; _lw = w; _lh = h; _li = I.join(',');
     ROT = h > w && TOUCH; document.documentElement.classList.toggle('ins', t + r + b + l > 0);
     if (ROT) {          // 舞台を 90° 回す：舞台の左＝画面の上、舞台の右＝画面の下、舞台の上＝画面の右
-      stage.style.width = (h - t - b) + 'px'; stage.style.height = (w - l - r) + 'px'; stage.style.left = (w - r) + 'px'; stage.style.top = t + 'px'; stage.style.transform = 'rotate(90deg)';
-      SOX = t; SOY = w - r;
+      stage.style.width = h + 'px'; stage.style.height = w + 'px'; stage.style.left = w + 'px'; stage.style.top = '0'; stage.style.transform = 'rotate(90deg)';
+      SOX = 0; SOY = w; setIns(r, b, l, t);          // 第 36 版：舞台は画面いっぱい。安全区は釦と文字だけが避ける
     } else {
-      stage.style.width = (w - l - r) + 'px'; stage.style.height = (h - t - b) + 'px'; stage.style.left = l + 'px'; stage.style.top = t + 'px'; stage.style.transform = 'none';
-      SOX = 0; SOY = w;
+      stage.style.width = '100%'; stage.style.height = '100%'; stage.style.left = '0'; stage.style.top = '0'; stage.style.transform = 'none';
+      SOX = 0; SOY = w; setIns(t, r, b, l);
     }
     document.documentElement.classList.toggle('rot', ROT);
   }
@@ -733,7 +786,7 @@ const MSGK = { 'QRコードから開いてください': 'err.noqr', 'QRコー�
   const meta = await fetch('meta.json', { cache: 'no-cache' }).then((r) => r.json());
   // 版の食い違い防止：このページの版番号と、サイトのデータ（meta.json）の版番号が違えば読み込み直す。
   // 古いページを開いたまま新しい画像を取りに行くと、地名と画像がずれ、境界の決まりも古いままになる
-  const BUILD = 25;
+  const BUILD = 26;
   const fresh = (b) => {          // 同じ版番号では 1 回だけ（アドレスに ?b= が付いていれば、もう試した）
     const q = '?b=' + encodeURIComponent(b);
     if (location.search === q) return false;
@@ -1095,7 +1148,7 @@ const MSGK = { 'QRコードから開いてください': 'err.noqr', 'QRコー�
   function fitIntro() {
     introEl.style.maxHeight = ''; introEl.scrollTop = 0; introEl.classList.remove('scroll', 'more', 'less');
     const H = stage.offsetHeight; if (!H || !introEl.childElementCount) return;
-    const avail = Math.floor(H - introEl.offsetTop - Math.max(12, H * 0.05));
+    const avail = Math.floor(H - introEl.offsetTop - Math.max(12, H * 0.05) - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--iB')) || 0));
     if (introEl.scrollHeight <= avail + 1) return;
     introEl.style.maxHeight = avail + 'px'; introEl.classList.add('scroll'); introEl.scrollTop = 0; markScroll();          // 先に滑らせられる状態にしてから先頭へ（前の欄で滑らせた位置が残らないように）
   }
@@ -1771,12 +1824,12 @@ void main() {
     const sec = (q, i) => { const e = el('div', 'sec'); e.style.animationDelay = (260 + i * 140) + 'ms'; e.append(el('h3', '', q.h), el('h4', '', q.jp)); for (const t of q.lines) e.appendChild(el('p', '', t)); return e; };
     const p1 = el('div', 'pg ab1');
     p1.append(el('div', 'eyebrow', A.eyebrow), el('p', 'name', A.name), el('div', 'sub', A.sub), el('div', 'rule'));
-    const c1 = el('div', 'cols'); (A.sections || []).forEach((q, i) => c1.appendChild(sec(q, i))); p1.appendChild(c1);
+    const c1 = el('div', 'cols flow'); (A.sections || []).forEach((q, i) => c1.appendChild(sec(q, i))); p1.appendChild(c1);
     [...p1.children].forEach((e, i) => { if (!e.style.animationDelay) e.style.animationDelay = (i * 70) + 'ms'; });
     const dn = el('button', 'scr', A.scroll || 'SCROLL'); dn.appendChild(el('i')); dn.onclick = () => sidePage.scrollTo({ top: p1.offsetHeight, behavior: 'smooth' }); p1.appendChild(dn);
     const p2 = el('div', 'pg two ab2');
     const up = el('button', 'scr up', A.up || 'ABOUT'); up.appendChild(el('i')); up.onclick = () => sidePage.scrollTo({ top: 0, behavior: 'smooth' });
-    const c2 = el('div', 'cols'); (A.notice || []).forEach((q, i) => c2.appendChild(sec(q, i)));
+    const c2 = el('div', 'cols flow'); (A.notice || []).forEach((q, i) => c2.appendChild(sec(q, i)));
     p2.append(up, c2, el('div', 'copy', A.copyright || ''));
     sidePage.append(p1, p2);
   }
@@ -1784,10 +1837,21 @@ void main() {
     const C = labels.chars || []; if (!C.length) return;
     const wrap = el('div', 'chr'), pic = el('div', 'pic'), txt = el('div', 'txt'), strip = el('div', 'strip'), img = el('img');
     img.alt = ''; img.draggable = false; pic.appendChild(img); wrap.append(pic, txt, strip); sidePage.appendChild(wrap);
-    let cur = -1, tok = 0;
+    let cur = -1, tok = 0, sr = 0;
+    const hp = (e) => (root.classList.contains('rot') ? e.clientY : e.clientX);
+    const mark = () => { const m = strip.scrollWidth - strip.clientWidth; strip.classList.toggle('ml', strip.scrollLeft > 1); strip.classList.toggle('mr', strip.scrollLeft < m - 1); };          // 端の淡さ：続きがある側だけ
+    const glide = (to) => { cancelAnimationFrame(sr); const from = strip.scrollLeft, t0 = performance.now();
+      to = Math.max(0, Math.min(Math.max(0, strip.scrollWidth - strip.clientWidth), to));
+      const f = (now) => { const k = Math.min(1, (now - t0) / 420); strip.scrollLeft = from + (to - from) * (1 - Math.pow(1 - k, 3)); mark(); if (k < 1) sr = requestAnimationFrame(f); }; sr = requestAnimationFrame(f); };
+    // 選んだ顔が全部見え、その先の一つが半分のぞく位置へ
+    const reveal = (i) => { const b = strip.children[i]; if (!b || !strip.clientWidth) return;
+      const cs = getComputedStyle(strip), pad = parseFloat(cs.paddingLeft) || 0, pk = b.offsetWidth * 0.55 + (parseFloat(cs.columnGap) || 0);
+      const l = b.offsetLeft - pad, r = l + b.offsetWidth, vw = strip.clientWidth - pad * 2, s0 = strip.scrollLeft, pr = i < C.length - 1 ? pk : 0, pl = i > 0 ? pk : 0;
+      let to = s0; if (r > to + vw - pr) to = r - vw + pr; if (l < to + pl) to = l - pl;
+      to = Math.round(to); if (Math.abs(to - s0) > 1) glide(to); else mark(); };
     const show = (i) => {
       if (i === cur) return; cur = i; const c = C[i], my = ++tok, n2 = (n) => String(n).padStart(2, '0');
-      [...strip.children].forEach((b, j) => b.classList.toggle('on', j === i));
+      [...strip.children].forEach((b, j) => b.classList.toggle('on', j === i)); reveal(i);
       txt.textContent = '';
       const body = el('div', 'body'); for (const t of c.body) body.appendChild(el('p', '', t));
       txt.append(el('div', 'eyebrow', 'CHARACTER ' + n2(i + 1) + ' / ' + n2(C.length)), el('p', 'name', c.name), el('div', 'sub', c.jp), el('div', 'role', c.role), el('div', 'rule'), body);
@@ -1798,8 +1862,29 @@ void main() {
         img.onload = () => { if (my === tok) img.classList.add('on'); }; img.src = u; }).catch(() => {});
     };
     C.forEach((c, i) => { const b = el('button', 'th'), t = el('img'); b.setAttribute('aria-label', c.name); t.alt = ''; t.draggable = false; t.src = c.thumb || ''; b.appendChild(t);
-      b.onclick = () => show(i); strip.appendChild(b); });
+      b.onclick = () => { if (strip._mv) return; show(i); }; strip.appendChild(b); });
+    if (C.length > 5) strip.classList.add('mr');
+    // 使える幅を測って顔の大きさを決める：ふだんは五つ＋六つ目が半分。五つでは大きすぎる（頁の高さの 24% を超える）ほど横長なら、一つ増やす
+    const layout = () => { const H = wrap.clientHeight; if (!strip.clientWidth || !H) return;
+      const cs = getComputedStyle(strip), gap = Math.round(parseFloat(cs.columnGap) || 8), avail = strip.clientWidth - (parseFloat(cs.paddingLeft) || 0) * 2, cap = H * 0.24;
+      let n = Math.min(5, C.length), w = 0;
+      for (;;) { const pk = n < C.length ? 0.55 : 0; w = (avail - gap * (pk ? n : n - 1)) / (n + pk); if (w <= cap || n >= C.length) break; n++; }
+      w = Math.floor(Math.max(40, Math.min(w, cap))); strip._n = n; strip.style.gap = gap + 'px';          // 整数にそろえる（滑らせた先が 1px ずれないように）
+      if (Math.abs(w - (strip._w || 0)) > 0.3) { strip._w = w; strip.style.setProperty('--thw', w.toFixed(2) + 'px'); if (cur >= 0) reveal(cur); }
+      mark(); };
     show(0);
+    // 小さい顔の列を横に動かす（放すと慣性）。縦持ちで回しているときは指の動きも回して読む。ホイールも
+    let sd = null;
+    strip.addEventListener('pointerdown', (e) => { cancelAnimationFrame(sr); strip._mv = false; sd = { x: hp(e), s: strip.scrollLeft, id: e.pointerId, v: 0, t: performance.now(), mv: false }; });
+    strip.addEventListener('pointermove', (e) => { if (!sd || e.pointerId !== sd.id) return; const dx = hp(e) - sd.x; if (!sd.mv && Math.abs(dx) < 6) return;
+      if (!sd.mv) { sd.mv = true; strip._mv = true; try { strip.setPointerCapture(e.pointerId); } catch (err) {} }
+      const now = performance.now(), before = strip.scrollLeft; strip.scrollLeft = sd.s - dx; sd.v = (strip.scrollLeft - before) / Math.max(1, now - sd.t); sd.t = now; mark(); });
+    const send = (e) => { if (!sd || (e && e.pointerId !== sd.id)) return; const d = sd; sd = null; if (!d.mv) return; setTimeout(() => { strip._mv = false; }, 60);
+      let v = performance.now() - d.t > 80 ? 0 : d.v;
+      const step = () => { if (Math.abs(v) < 0.02) return; const b = strip.scrollLeft; strip.scrollLeft += v * 16; v *= 0.94; mark(); if (strip.scrollLeft === b) return; sr = requestAnimationFrame(step); }; step(); };
+    strip.addEventListener('pointerup', send); strip.addEventListener('pointercancel', send);
+    strip.addEventListener('wheel', (e) => { cancelAnimationFrame(sr); strip.scrollLeft += Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY; mark(); e.preventDefault(); e.stopPropagation(); }, { passive: false });
+    strip._mark = mark; strip._fit = layout; layout(); requestAnimationFrame(layout); setTimeout(layout, 500);
     for (const c of C.slice(1)) loadImg(c.img).catch(() => {});          // 残りの絵も先に読んでおく
   }
   function closeSide() { root.classList.remove('side-open', 'side-full'); setTimeout(() => { if (!root.classList.contains('side-full')) sidePage.textContent = ''; }, 600); }
@@ -1833,25 +1918,24 @@ void main() {
   const FS = [1, 1.2, 1.45], FB = [1, 1.2, 1.4], FL = [1, 1.08, 1.16];      // 読む文字・ボタン・地名
   let lv = 1;          // 既定は中（第 30 版）。選んだことがあれば、その段（0・1・2）
   try { const v = localStorage.getItem('wv7fs'); if (v === '0' || v === '1' || v === '2') lv = +v; } catch (e) {}
-  // ボタンが入りきるように並べる。中央に置けなければ左へ寄せ（題は隠す）、それでも入らなければボタンの倍率を少しずつ下げる
+  // ボタンが入りきるように並べる。上の切替と下の釦はいつも左寄せ（第 38 版）。入らなければボタンの倍率を少しずつ下げる
   function fit() {
     const W = stage.offsetWidth; if (!W) return;
-    const top = $('top'), row = $('fsRow'), title = $('title'), bottom = $('bottom'), more = $('moreBtn'), vx = $('vx');
+    const gi = (k) => parseFloat(getComputedStyle(root).getPropertyValue(k)) || 0, mL = 14 + gi('--iL'), mR = 14 + gi('--iR');          // 左右の余白＝14＋その側の安全区
+    const top = $('top'), row = $('fsRow'), bottom = $('bottom'), more = $('moreBtn');
     let fb = FB[lv];
     for (let i = 0; i < 12; i++) {
       root.style.setProperty('--fb', fb);
-      stage.classList.remove('tightT', 'tightB');
+      stage.classList.add('tightT', 'tightB');          // 第 38 版：上の切替も下の釦もいつも左寄せ
       const tw = top.offsetWidth, rw = row.offsetWidth;
-      let okT = W / 2 - tw / 2 >= 14 + title.offsetWidth + 8 && W / 2 + tw / 2 + 8 <= W - 14 - rw;
-      if (!okT) { stage.classList.add('tightT'); okT = 14 + tw + 8 + rw + 14 <= W; }
+      const okT = mL + tw + 8 + rw + mR <= W;
       const bw = bottom.offsetWidth, mw = more.offsetWidth;
-      let okB = W / 2 - bw / 2 >= 14 + vx.offsetWidth + 8 && W / 2 + bw / 2 + 8 <= W - 14 - mw;
-      if (!okB) { stage.classList.add('tightB'); okB = 14 + bw + 8 + mw + 14 <= W; }
+      const okB = mL + bw + 8 + mw + mR <= W;
       if ((okT && okB) || fb <= 1) break;
       fb = Math.max(1, Math.round((fb - 0.05) * 100) / 100);
     }
     root.style.setProperty('--vxb', (12 + bottom.offsetHeight + 8) + 'px');
-    $('infoBtn').style.left = (14 + $('back').offsetWidth + 5) + 'px'; $('infoBtn').style.height = $('back').offsetHeight + 'px';
+    $('infoBtn').style.left = ($('back').offsetLeft + $('back').offsetWidth + 5) + 'px'; $('infoBtn').style.height = $('back').offsetHeight + 'px';
   }
   // 紹介の欄が左にあるときは文字大小を右下へ。地標の文字が欄・釦に重なったら消す
   const hit = (a, b) => a.left < b.right - 2 && a.right > b.left + 2 && a.top < b.bottom - 2 && a.bottom > b.top + 2;
@@ -1916,12 +2000,12 @@ void main() {
     const chr = sp.querySelector('.chr');
     if (chr) {
       const pic = chr.querySelector('.pic'), txt = chr.querySelector('.txt'), strip = chr.querySelector('.strip'), nm = txt && txt.querySelector('.name');
-      if (pic) chr.style.setProperty('--picw', pic.offsetWidth + 'px');
-      if (txt && strip) txt.style.setProperty('--rsvB', Math.max(20, chr.offsetHeight - strip.offsetTop + 10) + 'px');          // 下の小さい顔の列のぶん
+      if (pic) chr.style.setProperty('--picw', pic.offsetWidth + 'px'); if (strip && strip._fit) strip._fit();
+      if (txt && strip) txt.style.setProperty('--rsvB', Math.max(20, chr.offsetHeight - strip.offsetTop + 10) + 'px'); if (strip && strip._mark) strip._mark();          // 下の小さい顔の列のぶん
       if (nm) { nm.style.fontSize = ''; if (nm.scrollWidth > nm.clientWidth + 1) nm.style.fontSize = (parseFloat(getComputedStyle(nm).fontSize) * nm.clientWidth / nm.scrollWidth * 0.985).toFixed(2) + 'px'; }          // 名前は一行に
     }
-    // 三つ並びの欄：並べて入りきらなければ、上から下への一段ずつに切り替える（入りきるなら並べたまま）
-    sp.querySelectorAll('.pg .cols').forEach((c) => { const t = c.scrollTop; c.classList.remove('flow'); if (c.scrollHeight > c.clientHeight + 1) { c.classList.add('flow'); c.scrollTop = t; } });
+    // ABOUT の欄：いつも上から下への一段ずつ（第 39 版。画面や文字の大きさで並べ方を変えない）
+    sp.querySelectorAll('.pg .cols').forEach((c) => c.classList.add('flow'));
     sp.querySelectorAll('.pg .scr').forEach((b) => { if (b._pg) return; b._pg = 1; b.onclick = () => { const pg = b.closest('.pg'), to = b.classList.contains('up') ? pg.previousElementSibling : pg.nextElementSibling; pageTo(to ? to.offsetTop : (b.classList.contains('up') ? 0 : sp.scrollHeight)); }; });
     sp.querySelectorAll('.pg.two').forEach((pg) => { const up = pg.querySelector('.scr.up'); if (up) pg.style.setProperty('--rsvR', (up.offsetWidth + 10) + 'px'); });          // 右上の釦のぶん、時代の列を左へ寄せる
     const chn = sp.querySelector('.chron'); if (chn && !chn._drag) chronGo(chn, chn._cur || 0, true);
@@ -2016,6 +2100,23 @@ window.__wv7applyLang = function (l) {
   document.querySelectorAll('#langMenu button').forEach((b) => b.classList.toggle('on', b.dataset.l === l));
   if (window.__wv7fs) { window.__wv7fs.fit(); setTimeout(window.__wv7fs.fit, 400); }          // 字幅が変わるので並べ直す（字体が届いたあとにもう一度）
 };
+
+// ---- 第 37 版：全画面のボタン ----
+(function () {
+  const d = document, el = d.documentElement, btn = d.getElementById('fsBtn'); if (!btn) return;
+  const can = !!((d.fullscreenEnabled || d.webkitFullscreenEnabled) && (el.requestFullscreen || el.webkitRequestFullscreen));          // できないブラウザ（iPhone の Safari など）では出さない
+  if (!can) return;
+  const refit = () => { if (window.__wv7fs) { window.__wv7fs.fit(); setTimeout(window.__wv7fs.fit, 300); } };
+  const cur = () => d.fullscreenElement || d.webkitFullscreenElement;
+  const sync = () => { el.classList.toggle('isFs', !!cur()); refit(); };
+  const give = () => { btn.classList.remove('can'); refit(); };          // 「できる」と言いながら実際には入れないとき：ボタンを引っ込める
+  d.addEventListener('fullscreenchange', sync); d.addEventListener('webkitfullscreenchange', sync);
+  btn.addEventListener('click', (e) => { e.stopPropagation();
+    if (cur()) { try { (d.exitFullscreen || d.webkitExitFullscreen).call(d); } catch (err) {} return; }
+    try { const p = el.requestFullscreen ? el.requestFullscreen({ navigationUI: 'hide' }) : el.webkitRequestFullscreen(); if (p && p.catch) p.catch(give); } catch (err) { give(); return; }
+    setTimeout(() => { if (!cur()) give(); }, 1200); });
+  btn.classList.add('can'); refit();
+})();
 </script>
 </body>
 </html>
