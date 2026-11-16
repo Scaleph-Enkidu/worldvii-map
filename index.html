@@ -599,8 +599,8 @@ html[lang="ko"] { --f-jp: "Noto Sans JP Sub", "Apple SD Gothic Neo", "Malgun Got
 #sidePage { right: var(--iR); top: var(--iT); bottom: var(--iB); }
 #fsSeg3 { bottom: calc(12px + var(--iB)); }
 .side-full #sideBack { left: var(--iL); }
-.side-full #sidePage { left: calc(46px + var(--iL)); }
-.side-full #fsSeg3 { left: calc(3px + var(--iL)); }
+.side-full #sidePage { left: calc(64px + var(--iL)); }
+.side-full #fsSeg3 { left: calc(10px + var(--iL)); }
 .ins.flying body, .ins.flyend body { background: inherit; }
 /* ---- 第 37 版：全画面のボタン（ブラウザが「できる」と言うときだけ出す） ---- */
 #fsBtn { display: none; appearance: none; -webkit-appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 4px; padding: 0 calc(11px * var(--fb));
@@ -625,6 +625,25 @@ html[lang="ko"] { --f-jp: "Noto Sans JP Sub", "Apple SD Gothic Neo", "Malgun Got
 .vs.scroll { user-select: none; -webkit-user-select: none; cursor: grab; }
 /* ---- 第 41 版：小さい顔の列は絵の右から頁の右端まで。顔の大きさは使える幅から決める（ふだんは五つ＋六つ目が半分） ---- */
 .chr .strip { right: calc(5cqw - 10px); width: auto; max-width: none; }
+/* ---- 第 42 版 ---- */
+/* 1. 終点の画面で目の釦を押したら、戻る・文字の大きさ・縦倍率の字も隠す（目だけ残る） */
+.flyend.noinfo #back, .flyend.noinfo #fsSeg2 { opacity: 0 !important; pointer-events: none !important; }
+.flyend.noinfo #vx { opacity: 0 !important; }
+/* 2. ABOUT：項目のあいだに細い線 */
+.pg .cols.flow { gap: max(12px, 3cqh); }
+.pg .cols.flow .sec + .sec { border-top: 1px solid var(--fx-rule); padding-top: max(12px, 3cqh); }
+/* 3. 詳細パネルの左の細い帯を広く。戻る釦は枠つきで目立つように */
+#side { width: max(30%, 254px); }
+.side-full #side { width: 100%; }
+#sideBack { width: 64px; opacity: 1; }
+#sideBack span { width: 44px; height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; animation: none;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--panel); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#sideBack svg { width: 24px; height: 24px; display: block; animation: nudge42 2.2s ease-in-out infinite; }
+@keyframes nudge42 { 0%, 100% { transform: translateX(-2px); opacity: .78; } 50% { transform: translateX(3px); opacity: 1; } }
+#sideMenu { left: 64px; }
+#sidePage { left: 64px; }
+#fsSeg3 { left: 10px; width: 44px; }
+#fsSeg3 button.on::after { left: 11px; right: 11px; }
 </style>
 </head>
 <body>
@@ -664,7 +683,7 @@ html[lang="ko"] { --f-jp: "Noto Sans JP Sub", "Apple SD Gothic Neo", "Malgun Got
 <button id="moreBtn"><span>詳細<small>DETAILS</small></span><i>›</i></button>
 <div id="sideShade"></div>
 <div id="side">
-  <button id="sideBack" aria-label="back"><span>›</span></button>
+  <button id="sideBack" aria-label="back"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5l7.5 7.5L9 19.5"/></svg></span></button>
   <div id="fsSeg3" class="fsSeg" role="group" aria-label="Text size"><button data-fs="0">A</button><button data-fs="1">A</button><button data-fs="2">A</button></div>
 <div id="sideMenu">
     <button data-p="world">世界観<small>WORLD</small></button>
@@ -786,7 +805,7 @@ const MSGK = { 'QRコードから開いてください': 'err.noqr', 'QRコー�
   const meta = await fetch('meta.json', { cache: 'no-cache' }).then((r) => r.json());
   // 版の食い違い防止：このページの版番号と、サイトのデータ（meta.json）の版番号が違えば読み込み直す。
   // 古いページを開いたまま新しい画像を取りに行くと、地名と画像がずれ、境界の決まりも古いままになる
-  const BUILD = 26;
+  const BUILD = 27;
   const fresh = (b) => {          // 同じ版番号では 1 回だけ（アドレスに ?b= が付いていれば、もう試した）
     const q = '?b=' + encodeURIComponent(b);
     if (location.search === q) return false;
